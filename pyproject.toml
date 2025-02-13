@@ -4,54 +4,149 @@ build-backend = "hatchling.build"
 
 [project]
 name = "permguard-sdk"
-dynamic = ["version"]
-description = ''
+description = 'Permguard Python SDK (Authorization Check) - https://www.permguard.com'
 readme = "README.md"
 requires-python = ">=3.8"
-license = "Apache-2.0"
-keywords = []
+license = "apache-2.0"
+keywords = [
+  "Permguard",
+  "Nitro Agility S.r.l."
+]
 authors = [
   { name = "Nitro Agility S.r.l.", email = "opensource@permguard.com" },
 ]
 classifiers = [
-  "Development Status :: 4 - Beta",
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "License :: Other/Proprietary License",
+  "Natural Language :: English",
+  "Operating System :: OS Independent",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
+  "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-dependencies = []
+dependencies = [
+  "pytz~=2023.3",
+  "tzlocal~=4.3",
+  "deepdiff~=8.0.1",
+  "pydantic~=1.10.7"
+]
+dynamic = ["version"]
 
 [project.urls]
-Documentation = "https://github.com/Nicola Gallo/permguard-sdk#readme"
-Issues = "https://github.com/Nicola Gallo/permguard-sdk/issues"
-Source = "https://github.com/Nicola Gallo/permguard-sdk"
+Documentation = "https://bitbucket.org/nitroagility/pandoro-v2-wiki"
+Source = "https://bitbucket.org/nitroagility/pandoro-v2-python-core"
 
 [tool.hatch.version]
-path = "src/permguard_sdk/__about__.py"
+path = "permguard_sdk/__about__.py"
 
-[tool.hatch.envs.types]
-extra-dependencies = [
-  "mypy>=1.0.0",
+[tool.mypy]
+disallow_any_generics = true
+disallow_incomplete_defs = true
+disallow_untyped_calls = true
+disallow_untyped_decorators = true
+disallow_untyped_defs = true
+follow_imports = 'skip'
+ignore_missing_imports = true
+no_implicit_reexport = true
+show_error_codes = true
+show_error_context = true
+strict_equality = true
+strict_optional = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+module = [
+    "*.hatchling.*",
+    "*.hatch.utils.*",
 ]
-[tool.hatch.envs.types.scripts]
-check = "mypy --install-types --non-interactive {args:src/permguard_sdk tests}"
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+warn_no_return = true
+
+[tool.black]
+line-length = 120
+skip-string-normalization = true
+target-version = ["py38"]
+
+[tool.ruff]
+target-version = "py38"
+line-length = 120
+select = [
+  "A",
+  "B",
+  "C",
+  "DTZ",
+  "E",
+  "EM",
+  "F",
+  "FBT",
+  "I",
+  "ICN",
+  "ISC",
+  "N",
+  "PLC",
+  "PLE",
+  "PLR",
+  "PLW",
+  "Q",
+  "RUF",
+  "S",
+  "SIM",
+  "T",
+  "TID",
+  "UP",
+  "W",
+  "YTT",
+]
+ignore = [
+  # Allow non-abstract empty methods in abstract base classes
+  "B024", "B027",
+  # Allow boolean positional values in function calls, like `dict.get(... True)`
+  "FBT003",
+  # Ignore checks for possible passwords
+  "S105", "S106", "S107",
+  # Ignore complexity
+  "C901", "PLR0911", "PLR0912", "PLR0913", "PLR0915",
+  "PLC1901", # empty string comparisons
+  "PLW2901", # `for` loop variable overwritten
+    "SIM114", # Combine `if` branches using logical `or` operator
+  "FBT001", "FBT002", "FBT003",
+]
+unfixable = [
+  # Don't touch unused imports
+  "F401",
+]
+
+[tool.ruff.isort]
+known-first-party = ["hatch", "hatchling"]
+
+[tool.ruff.flake8-quotes]
+inline-quotes = "single"
+
+[tool.ruff.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.per-file-ignores]
+# Allow print/pprint
+"scripts/*" = ["T201"]
+# Tests can use magic values, assertions, and relative imports
+"tests/**/*" = ["PLR2004", "S101", "TID252"]
 
 [tool.coverage.run]
-source_pkgs = ["permguard_sdk", "tests"]
 branch = true
 parallel = true
 omit = [
-  "src/permguard_sdk/__about__.py",
+  "permguard_sdk/__about__.py",
+  "permguard_sdk/**/__init__.py",
 ]
-
-[tool.coverage.paths]
-permguard_sdk = ["src/permguard_sdk", "*/permguard-sdk/src/permguard_sdk"]
-tests = ["tests", "*/permguard-sdk/tests"]
 
 [tool.coverage.report]
 exclude_lines = [
