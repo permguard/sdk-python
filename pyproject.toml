@@ -39,8 +39,8 @@ dependencies = [
 dynamic = ["version"]
 
 [project.urls]
-Documentation = "https://bitbucket.org/nitroagility/pandoro-v2-wiki"
-Source = "https://bitbucket.org/nitroagility/pandoro-v2-python-core"
+Documentation = "https://www.permguard.com"
+Source = "https://github.com/permguard/permguard"
 
 [tool.hatch.version]
 path = "permguard_sdk/__about__.py"

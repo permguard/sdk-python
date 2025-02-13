@@ -5,7 +5,7 @@ from pathlib import Path
 from lxml import etree  # nosec B410
 
 PACKAGES = {
-    'pandoro_core/': 'pandoro_core',
+    'permguard_sdk/': 'permguard_sdk',
     'tests/': 'tests',
 }
 

@@ -7,7 +7,7 @@ exclude = [
 ]
 
 [build.targets.wheel]
-packages = ["pandoro_core"]
+packages = ["permguard_sdk"]
 
 [build.targets.wheel.hooks.mypyc]
 enable-by-default = false
@@ -39,7 +39,7 @@ dependencies = [
 ]
 
 [envs.lint.scripts]
-typing = "mypy --install-types --allow-subclassing-any --non-interactive {args:pandoro_core tests}"
+typing = "mypy --install-types --allow-subclassing-any --non-interactive {args:permguard_sdk tests}"
 style = [
   "ruff {args:.}",
   "black --check --diff {args:.}",
@@ -56,7 +56,7 @@ all = [
 
 [envs.default.scripts]
 hello = "python --version"
-cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=pandoro_core --cov=tests {args}"
+cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=permguard_sdk --cov=tests {args}"
 no-cov = "cov --no-cov {args}"
 dev = "pytest -p no:randomly --no-cov {args:tests}"
 
