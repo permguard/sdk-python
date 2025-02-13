@@ -1,0 +1,83 @@
+[build.targets.sdist]
+exclude = [
+  ".nitroci",
+  "scripts",
+  ".teller.yml",
+  "bitbucket-pipelines.yml"
+]
+
+[build.targets.wheel]
+packages = ["permguard_sdk"]
+
+[build.targets.wheel.hooks.mypyc]
+enable-by-default = false
+dependencies = ["hatch-mypyc"]
+
+[envs.default.env-vars]
+
+
+[envs.default]
+python = "3.8"
+dependencies = [
+  "coverage[toml]>=6.2",
+  "filelock>=3.7.1",
+  "pytest",
+  "pytest-cov",
+  "pytest-mock",
+  "pytest-randomly",
+  "pytest-rerunfailures",
+  "pytest-xdist",
+  "trustme",
+]
+
+[envs.lint]
+detached = true
+dependencies = [
+  "black>=23.1.0",
+  "mypy>=1.0.0",
+  "ruff>=0.0.259",
+]
+
+[envs.lint.scripts]
+typing = "mypy --install-types --allow-subclassing-any --non-interactive {args:permguard_sdk tests}"
+style = [
+  "ruff {args:.}",
+  "black --check --diff {args:.}",
+]
+fmt = [
+  "black {args:.}",
+  "ruff --fix {args:.}",
+  "style",
+]
+all = [
+  "style",
+  "typing",
+]
+
+[envs.default.scripts]
+hello = "python --version"
+cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=permguard_sdk --cov=tests {args}"
+no-cov = "cov --no-cov {args}"
+dev = "pytest -p no:randomly --no-cov {args:tests}"
+
+[envs.test.overrides]
+env.HERMETIC_TESTS.type = [
+  { value = "container", if = ["true"] },
+  "virtual",
+]
+
+[[envs.test.matrix]]
+python = ["38", "39", "310", "311"]
+
+[envs.coverage]
+detached = true
+dependencies = [
+  "coverage[toml]>=6.2",
+  "lxml",
+]
+[envs.coverage.scripts]
+combine = "coverage combine {args}"
+report-xml = "coverage xml"
+report-uncovered-html = "coverage html --skip-covered --skip-empty"
+generate-summary = "python scripts/generate_coverage_summary.py"
+write-summary-report = "python scripts/wr ite_coverage_summary_report.py"
