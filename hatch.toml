@@ -32,6 +32,7 @@ dependencies = [
   "pytest-rerunfailures",
   "pytest-xdist",
   "trustme",
+  "grpcio-tools~=1.70.0",
 ]
 
 [envs.lint]
@@ -60,6 +61,7 @@ all = [
 
 [envs.default.scripts]
 version = "python --version"
+protoc = "python -m grpc_tools.protoc --proto_path=./proto/v1 ./pdp.proto --python_out=. --grpc_python_out=."
 check = "python ./check.py"
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=permguard_sdk --cov=tests {args}"
 no-cov = "cov --no-cov {args}"
