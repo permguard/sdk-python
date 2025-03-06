@@ -8,6 +8,7 @@ exclude = [
   "makefile",
   "Taskfile.yml",
   "tests",
+  "requests",
   "check.py"
 ]
 
