@@ -8,8 +8,7 @@ exclude = [
   "makefile",
   "Taskfile.yml",
   "tests",
-  "requests",
-  "check.py"
+  "examples"
 ]
 
 [build.targets.wheel]
@@ -62,7 +61,9 @@ all = [
 
 [envs.default.scripts]
 version = "python --version"
-protoc = "python -m grpc_tools.protoc --proto_path=./proto/v1 ./pdp.proto --python_out=. --grpc_python_out=."
+protoc = "make protoc"
+          
+
 check = "python ./check.py"
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=permguard_sdk --cov=tests {args}"
 no-cov = "cov --no-cov {args}"
