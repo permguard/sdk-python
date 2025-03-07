@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http:#www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,19 +18,19 @@ from copy import deepcopy
 
 
 # Constants
-SUBJECT_DEFAULT_KIND = "user"
-USER_TYPE = "user"         # Assumed value, adjust as needed
-ROLE_ACTOR_TYPE = "role_actor"  # Assumed value, adjust as needed
-TWIN_ACTOR_TYPE = "twin_actor"  # Assumed value, adjust as needed
+SUBJECT_DEFAULT_KIND = "USER"
+USER_TYPE = "USER"
+ROLE_ACTOR_TYPE = "ROLE-ACTOR"
+TWIN_ACTOR_TYPE = "TWIN-ACTOR"
 
 
 class Subject:
     """Class representing a subject."""
     def __init__(self, id: str):
-        self.id = id                # Unique identifier for the subject
-        self.type = SUBJECT_DEFAULT_KIND  # Type of the subject, defaults to "user"
-        self.source = None          # Source of the subject, initially None
-        self.properties = None      # Properties dictionary, initially None
+        self.id = id
+        self.type = SUBJECT_DEFAULT_KIND
+        self.source = None
+        self.properties = None
 
 
 class SubjectBuilder:

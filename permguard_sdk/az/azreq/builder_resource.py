@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http:#www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,9 +20,9 @@ from copy import deepcopy
 class Resource:
     """Class representing a resource."""
     def __init__(self, kind: str):
-        self.type = kind  # Type of the resource
-        self.id = None    # ID of the resource, initially None
-        self.properties = None  # Properties dictionary, initially None
+        self.type = kind
+        self.id = None
+        self.properties = None
 
 
 class ResourceBuilder:
