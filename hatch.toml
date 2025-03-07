@@ -62,9 +62,7 @@ all = [
 [envs.default.scripts]
 version = "python --version"
 protoc = "make protoc"
-          
-
-check = "python ./check.py"
+check = "python ./examples/cmd/check.py"
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=permguard_sdk --cov=tests {args}"
 no-cov = "cov --no-cov {args}"
 dev = "pytest -p no:randomly --no-cov {args:tests}"
