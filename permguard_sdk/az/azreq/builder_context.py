@@ -14,6 +14,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import copy
 from typing import Any, Dict
 
 
@@ -31,4 +32,4 @@ class ContextBuilder:
 
     def build(self) -> Dict[str, Any]:
         """Build and return the context dictionary."""
-        return self._context.model_copy(deep=True)
+        return copy.deepcopy(self._context)

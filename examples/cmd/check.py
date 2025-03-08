@@ -24,6 +24,7 @@ from permguard_sdk.az.azreq.builder_request_atomic import AZAtomicRequestBuilder
 from permguard_sdk.az.azreq.builder_request_composed import AZRequestBuilder
 from permguard_sdk.az.azreq.builder_resource import ResourceBuilder
 from permguard_sdk.az.azreq.builder_subject import SubjectBuilder
+from permguard_sdk.az.azreq.model import AZRequest
 from permguard_sdk.az_client import AZClient
 from permguard_sdk.az_config import with_endpoint
 
@@ -39,7 +40,7 @@ def check_json_request():
 
     try:
         # Deserializza la richiesta JSON in un oggetto AZRequest
-        req = AZRequestBuilder.model_validate_json(json_file)
+        req = AZRequest.model_validate_json(json_file)
     except json.JSONDecodeError:
         print("❌ Authorization request deserialization failed")
         return

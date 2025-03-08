@@ -27,4 +27,4 @@ def authorization_check(endpoint: str, req: AZRequest) -> Optional[AZResponse]:
     if req.evaluations is None:
         req.evaluations = []
 
-    return AZResponse(decision=True, evaluations=req.evaluations)
+    return AZResponse(decision=False, evaluations=req.evaluations)

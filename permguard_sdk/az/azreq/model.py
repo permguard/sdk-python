@@ -24,7 +24,7 @@ class PolicyStore(BaseModel):
 
 
 class Entities(BaseModel):
-    schema_name: Optional[str] = Field(alias="schema")  
+    schema_name: Optional[str] = Field(default="", alias="schema")  
     items: List[Dict[str, Any]] = []
 
 
