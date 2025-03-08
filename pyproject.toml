@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "permguard_sdk"
+name = "permguard"
 description = 'Permguard Python SDK (Authorization Check) - https://www.permguard.com'
 readme = "README.md"
 requires-python = ">=3.8"
