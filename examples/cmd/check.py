@@ -29,7 +29,6 @@ from permguard_sdk.az_client import AZClient
 from permguard_sdk.az_config import with_endpoint
 
 
-# Caricamento del file JSON incorporato (equivalente a `//go:embed`)
 with open("./examples/cmd/requests/ok_onlyone1.json", "r") as f:
     json_file = f.read()
 
@@ -39,14 +38,12 @@ def check_json_request():
     az_client = AZClient(with_endpoint("localhost", 9094))
 
     try:
-        # Deserializza la richiesta JSON in un oggetto AZRequest
         req = AZRequest.model_validate_json(json_file)
     except json.JSONDecodeError:
         print("❌ Authorization request deserialization failed")
         return
 
-    # Effettua la verifica di autorizzazione
-    decision, response, _ = az_client.check(req)
+    decision, response = az_client.check(req)
     print_authorization_result(decision, response)
 
 
@@ -54,10 +51,8 @@ def check_atomic_evaluation():
     """Check an atomic authorization evaluation."""
     az_client = AZClient(with_endpoint("localhost", 9094))
 
-    # Creazione del Principal
     principal = PrincipalBuilder("amy.smith@acmecorp.com").build()
 
-    # Creazione delle entità
     entities = [
         {
             "uid": {"type": "MagicFarmacia::Platform::BranchInfo", "id": "subscription"},
@@ -66,7 +61,6 @@ def check_atomic_evaluation():
         }
     ]
 
-    # Creazione della richiesta di autorizzazione
     req = (
         AZAtomicRequestBuilder(
             895741663247,
@@ -89,8 +83,7 @@ def check_atomic_evaluation():
         .build()
     )
 
-    # Effettua la verifica di autorizzazione
-    decision, response, _ = az_client.check(req)
+    decision, response = az_client.check(req)
     print_authorization_result(decision, response)
 
 
@@ -98,7 +91,6 @@ def check_multiple_evaluations():
     """Check multiple authorization evaluations."""
     az_client = AZClient(with_endpoint("localhost", 9094))
 
-    # Creazione del Subject
     subject = (
         SubjectBuilder("platform-creator")
         .with_role_actor_type()
@@ -107,7 +99,6 @@ def check_multiple_evaluations():
         .build()
     )
 
-    # Creazione della Risorsa
     resource = (
         ResourceBuilder("MagicFarmacia::Platform::Subscription")
         .with_id("e3a786fd07e24bfa95ba4341d3695ae8")
@@ -115,11 +106,9 @@ def check_multiple_evaluations():
         .build()
     )
 
-    # Creazione delle Azioni
     action_view = ActionBuilder("MagicFarmacia::Platform::Action::view").with_property("isEnabled", True).build()
     action_create = ActionBuilder("MagicFarmacia::Platform::Action::create").with_property("isEnabled", True).build()
 
-    # Creazione del Context
     context = (
         ContextBuilder()
         .with_property("time", "2025-01-23T16:17:46+00:00")
@@ -127,14 +116,11 @@ def check_multiple_evaluations():
         .build()
     )
 
-    # Creazione delle Valutazioni
     evaluation_view = EvaluationBuilder(subject, resource, action_view).with_request_id("1234").with_context(context).build()
     evaluation_create = EvaluationBuilder(subject, resource, action_create).with_request_id("7890").with_context(context).build()
 
-    # Creazione del Principal
     principal = PrincipalBuilder("amy.smith@acmecorp.com").build()
 
-    # Creazione delle entità
     entities = [
         {
             "uid": {"type": "MagicFarmacia::Platform::BranchInfo", "id": "subscription"},
@@ -143,7 +129,6 @@ def check_multiple_evaluations():
         }
     ]
 
-    # Creazione della richiesta di autorizzazione
     req = (
         AZRequestBuilder(895741663247, "809257ed202e40cab7e958218eecad20")
         .with_principal(principal)
@@ -153,8 +138,7 @@ def check_multiple_evaluations():
         .build()
     )
 
-    # Effettua la verifica di autorizzazione
-    decision, response, _ = az_client.check(req)
+    decision, response = az_client.check(req)
     print_authorization_result(decision, response)
 
 
@@ -173,10 +157,16 @@ def print_authorization_result(decision, response):
                 if eval.context and eval.context.reason_user:
                     print(f"-> Reason Admin: {eval.context.reason_admin.message}")
                     print(f"-> Reason User: {eval.context.reason_user.message}")
+        if response and response.evaluations:
+            for eval in response.evaluations:
+                if eval.context:
+                    if eval.context.reason_admin:
+                        print(f"-> Evaluation RequestID {eval.request_id}: Reason Admin: {eval.context.reason_admin.message}")
+                    if eval.context.reason_user:
+                        print(f"-> Evaluation RequestID {eval.request_id}: Reason User: {eval.context.reason_user.message}")
 
 
-# Esegui i test
 if __name__ == "__main__":
-    #check_json_request()
+    check_json_request()
     check_atomic_evaluation()
-    #check_multiple_evaluations()
+    check_multiple_evaluations()

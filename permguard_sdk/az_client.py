@@ -33,13 +33,10 @@ class AZClient:
         for opt in opts:
             opt(self._az_config)
 
-    def check(self, req: AZRequest) -> Tuple[bool, Optional[AZResponse], Optional[Exception]]:
+    def check(self, req: AZRequest) -> Tuple[bool, Optional[AZResponse]]:
         """Check the input authorization request with the authorization server."""
         target = f"{self._az_config.pdp_endpoint.endpoint}:{self._az_config.pdp_endpoint.port}"
-        
-        try:
-            can_execute = authorization_check(target, req)
-            decision = can_execute.decision if can_execute else False
-            return decision, can_execute, None
-        except Exception as e:
-            return False, None, e
+       
+        can_execute = authorization_check(target, req)
+        decision = can_execute.decision if can_execute else False
+        return decision, can_execute

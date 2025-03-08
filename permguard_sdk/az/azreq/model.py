@@ -24,7 +24,7 @@ class PolicyStore(BaseModel):
 
 
 class Entities(BaseModel):
-    schema_name: Optional[str] = Field(default="", alias="schema")  
+    schema_name: Optional[str] = Field(default='', alias="schema")  
     items: List[Dict[str, Any]] = []
 
 
@@ -69,7 +69,7 @@ class AZModel(BaseModel):
 
 class AZRequest(BaseModel):
     authorization_model: Optional[AZModel] = None
-    request_id: Optional[str] = None
+    request_id: str = Field(default='', alias="RequestID")
     subject: Optional[Subject] = None
     resource: Optional[Resource] = None
     action: Optional[Action] = None
@@ -78,24 +78,24 @@ class AZRequest(BaseModel):
 
 
 class ReasonResponse(BaseModel):
-    code: Optional[str] = None
-    message: Optional[str] = None
+    code: Optional[str] =  Field(default=None, alias="Code") 
+    message: Optional[str] =  Field(default=None, alias="Message") 
 
 
 class ContextResponse(BaseModel):
-    id: Optional[str] = None
-    reason_admin: Optional[ReasonResponse] = None
-    reason_user: Optional[ReasonResponse] = None
+    id: Optional[str] = Field(None, alias="ID")
+    reason_admin: Optional[ReasonResponse] = Field(default=None, alias="ReasonAdmin") 
+    reason_user: Optional[ReasonResponse] = Field(default=None, alias="ReasonUser") 
 
 
 class EvaluationResponse(BaseModel):
-    request_id: str
-    decision: Optional[bool] = None
-    context: Optional[ContextResponse] = None
+    request_id: str = Field(default='', alias="RequestID")
+    decision: bool = Field(default=False, alias="Decision")
+    context: Optional[ContextResponse] = Field(default=None, alias="Context") 
 
 
 class AZResponse(BaseModel):
-    request_id: Optional[str] = None
-    decision: bool
-    context: Optional[ContextResponse] = None
-    evaluations: List[EvaluationResponse] = []
+    request_id: str = Field(default='', alias="RequestID")
+    decision: bool = Field(default=False, alias="Decision")
+    context: Optional[ContextResponse] = Field(default=None, alias="Context") 
+    evaluations: List[EvaluationResponse] = Field(default=[], alias="Evaluations") 
