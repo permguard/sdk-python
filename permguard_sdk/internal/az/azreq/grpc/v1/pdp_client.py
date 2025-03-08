@@ -17,6 +17,7 @@
 import grpc
 from google.protobuf.struct_pb2 import Struct
 from google.protobuf.json_format import MessageToJson
+
 from permguard_sdk.az.azreq.model import AZRequest, AZResponse
 from permguard_sdk.internal.az.azreq.grpc.v1 import pdp_pb2, pdp_pb2_grpc
 
@@ -34,6 +35,7 @@ def map_az_request_to_grpc(az_request: AZRequest) -> pdp_pb2.AuthorizationCheckR
     if az_request is None:
         raise ValueError("Invalid AZRequest: input is None")
 
+
     # Authorization Model
     auth_model = None
     if az_request.authorization_model:
@@ -43,6 +45,8 @@ def map_az_request_to_grpc(az_request: AZRequest) -> pdp_pb2.AuthorizationCheckR
                 Kind=az_request.authorization_model.policy_store.kind,
                 ID=az_request.authorization_model.policy_store.id,
             )
+            if policy_store.Kind is None or policy_store.Kind == '':
+                policy_store.Kind = 'ledger'
 
         principal = None
         if az_request.authorization_model.principal:
@@ -153,10 +157,12 @@ def authorization_check(endpoint: str, az_request: AZRequest) -> AZResponse:
     if az_request is None:
         raise ValueError("PEP: Invalid request")
 
+
     with grpc.insecure_channel(endpoint) as channel:
         stub = pdp_pb2_grpc.V1PDPServiceStub(channel)
 
         grpc_request = map_az_request_to_grpc(az_request)
+        print(MessageToJson(grpc_request))
         grpc_response = stub.AuthorizationCheck(grpc_request)
 
         reponse_json = MessageToJson(grpc_response)

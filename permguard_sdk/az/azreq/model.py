@@ -69,7 +69,7 @@ class AZModel(BaseModel):
 
 class AZRequest(BaseModel):
     authorization_model: Optional[AZModel] = None
-    request_id: str = Field(default='', alias="RequestID")
+    request_id: str = Field(default='')
     subject: Optional[Subject] = None
     resource: Optional[Resource] = None
     action: Optional[Action] = None

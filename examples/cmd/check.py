@@ -168,5 +168,5 @@ def print_authorization_result(ok, response):
 
 if __name__ == "__main__":
     check_json_request()
-    check_atomic_evaluation()
-    check_multiple_evaluations()
+    #check_atomic_evaluation()
+    #check_multiple_evaluations()
