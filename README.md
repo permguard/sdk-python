@@ -17,7 +17,16 @@ Plase refer to the [Permguard Documentation](https://www.permguard.com/) for mor
 
 ## Prerequisites
 
-- **Python 1.23.5**
+- **Python 3.8, 3.9, 3.10, 3.11** (supported versions)
+
+This package is compatible with the following Python versions:
+
+- `Programming Language :: Python :: 3.8`
+- `Programming Language :: Python :: 3.9`
+- `Programming Language :: Python :: 3.10`
+- `Programming Language :: Python :: 3.11`
+
+Make sure you have one of these versions installed before proceeding.
 
 ---
 
