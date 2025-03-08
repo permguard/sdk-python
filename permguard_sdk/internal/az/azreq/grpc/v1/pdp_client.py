@@ -34,25 +34,39 @@ def map_az_request_to_grpc(az_request: AZRequest) -> pdp_pb2.AuthorizationCheckR
     if az_request is None:
         raise ValueError("Invalid AZRequest: input is None")
 
+    # Authorization Model
     auth_model = None
     if az_request.authorization_model:
+        policy_store = None
+        if az_request.authorization_model.policy_store:
+            policy_store = pdp_pb2.PolicyStore(
+                Kind=az_request.authorization_model.policy_store.kind,
+                ID=az_request.authorization_model.policy_store.id,
+            )
+
+        principal = None
+        if az_request.authorization_model.principal:
+            principal = pdp_pb2.Principal(
+                Type=az_request.authorization_model.principal.type,
+                ID=az_request.authorization_model.principal.id,
+                Source=az_request.authorization_model.principal.source,
+            )
+
+        entities = None
+        if az_request.authorization_model.entities:
+            entities = pdp_pb2.Entities(
+                Schema=az_request.authorization_model.entities.schema_name,
+                Items=[dict_to_struct(item) for item in az_request.authorization_model.entities.items],
+            )
+
         auth_model = pdp_pb2.AuthorizationModelRequest(
             ZoneID=az_request.authorization_model.zone_id,
-            PolicyStore=pdp_pb2.PolicyStore(
-                Kind=az_request.authorization_model.policy_store.kind if az_request.authorization_model.policy_store else "",
-                ID=az_request.authorization_model.policy_store.id if az_request.authorization_model.policy_store else "",
-            ),
-            Principal=pdp_pb2.Principal(
-                Type=az_request.authorization_model.principal.type if az_request.authorization_model.principal else "",
-                ID=az_request.authorization_model.principal.id if az_request.authorization_model.principal else "",
-                Source=az_request.authorization_model.principal.source if az_request.authorization_model.principal else "",
-            ),
-            Entities=pdp_pb2.Entities(
-                Schema=az_request.authorization_model.entities.schema_name if az_request.authorization_model.entities else "",
-                Items=[dict_to_struct(item) for item in az_request.authorization_model.entities.items] if az_request.authorization_model.entities else [],
-            ),
+            PolicyStore=policy_store,
+            Principal=principal,
+            Entities=entities,
         )
 
+    # Subject
     subject = None
     if az_request.subject:
         subject = pdp_pb2.Subject(
@@ -62,6 +76,7 @@ def map_az_request_to_grpc(az_request: AZRequest) -> pdp_pb2.AuthorizationCheckR
             Properties=dict_to_struct(az_request.subject.properties) if az_request.subject.properties else Struct(),
         )
 
+    # Resource
     resource = None
     if az_request.resource:
         resource = pdp_pb2.Resource(
@@ -70,6 +85,7 @@ def map_az_request_to_grpc(az_request: AZRequest) -> pdp_pb2.AuthorizationCheckR
             Properties=dict_to_struct(az_request.resource.properties) if az_request.resource.properties else Struct(),
         )
 
+    # Action
     action = None
     if az_request.action:
         action = pdp_pb2.Action(
@@ -77,37 +93,53 @@ def map_az_request_to_grpc(az_request: AZRequest) -> pdp_pb2.AuthorizationCheckR
             Properties=dict_to_struct(az_request.action.properties) if az_request.action.properties else Struct(),
         )
 
+    # Context
     context = dict_to_struct(az_request.context) if az_request.context else Struct()
 
+    # Evaluations
     evaluations = []
     if az_request.evaluations:
-        evaluations = [
-            pdp_pb2.EvaluationRequest(
-                RequestID=eval.request_id,
-                Subject=pdp_pb2.Subject(
-                    Type=eval.subject.type if eval.subject else "",
-                    ID=eval.subject.id if eval.subject else "",
-                    Source=eval.subject.source if eval.subject else "",
-                    Properties=dict_to_struct(eval.subject.properties) if eval.subject and eval.subject.properties else Struct(),
-                ),
-                Resource=pdp_pb2.Resource(
-                    Type=eval.resource.type if eval.resource else "",
-                    ID=eval.resource.id if eval.resource else "",
-                    Properties=dict_to_struct(eval.resource.properties) if eval.resource and eval.resource.properties else Struct(),
-                ),
-                Action=pdp_pb2.Action(
-                    Name=eval.action.name if eval.action else "",
-                    Properties=dict_to_struct(eval.action.properties) if eval.action and eval.action.properties else Struct(),
-                ),
-                Context=dict_to_struct(eval.context) if eval.context else Struct(),
+        for eval in az_request.evaluations:
+            eval_subject = None
+            if eval.subject:
+                eval_subject = pdp_pb2.Subject(
+                    Type=eval.subject.type,
+                    ID=eval.subject.id,
+                    Source=eval.subject.source,
+                    Properties=dict_to_struct(eval.subject.properties) if eval.subject.properties else Struct(),
+                )
+
+            eval_resource = None
+            if eval.resource:
+                eval_resource = pdp_pb2.Resource(
+                    Type=eval.resource.type,
+                    ID=eval.resource.id,
+                    Properties=dict_to_struct(eval.resource.properties) if eval.resource.properties else Struct(),
+                )
+
+            eval_action = None
+            if eval.action:
+                eval_action = pdp_pb2.Action(
+                    Name=eval.action.name,
+                    Properties=dict_to_struct(eval.action.properties) if eval.action.properties else Struct(),
+                )
+
+            eval_context = dict_to_struct(eval.context) if eval.context else Struct()
+
+            evaluations.append(
+                pdp_pb2.EvaluationRequest(
+                    RequestID=eval.request_id,
+                    Subject=eval_subject,
+                    Resource=eval_resource,
+                    Action=eval_action,
+                    Context=eval_context,
+                )
             )
-            for eval in az_request.evaluations
-        ]
 
     # Creazione della richiesta gRPC
     return pdp_pb2.AuthorizationCheckRequest(
         AuthorizationModel=auth_model,
-        RequestID=az_request.request_id if az_request.request_id else "",
+        RequestID=az_request.request_id,
         Subject=subject,
         Resource=resource,
         Action=action,
