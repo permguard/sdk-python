@@ -43,8 +43,8 @@ def check_json_request():
         print("❌ Authorization request deserialization failed")
         return
 
-    decision, response = az_client.check(req)
-    print_authorization_result(decision, response)
+    ok, response = az_client.check(req)
+    print_authorization_result(ok, response)
 
 
 def check_atomic_evaluation():
@@ -83,8 +83,8 @@ def check_atomic_evaluation():
         .build()
     )
 
-    decision, response = az_client.check(req)
-    print_authorization_result(decision, response)
+    ok, response = az_client.check(req)
+    print_authorization_result(ok, response)
 
 
 def check_multiple_evaluations():
@@ -138,13 +138,13 @@ def check_multiple_evaluations():
         .build()
     )
 
-    decision, response = az_client.check(req)
-    print_authorization_result(decision, response)
+    ok, response = az_client.check(req)
+    print_authorization_result(ok, response)
 
 
-def print_authorization_result(decision, response):
+def print_authorization_result(ok, response):
     """Print the result of an authorization request."""
-    if decision:
+    if ok:
         print("✅ Authorization Permitted")
     else:
         print("❌ Authorization Denied")
