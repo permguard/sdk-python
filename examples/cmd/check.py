@@ -14,6 +14,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import time
 import grpc
 from permguard_sdk.internal.az.azreq.grpc.v1 import pdp_pb2
 from permguard_sdk.internal.az.azreq.grpc.v1 import pdp_pb2_grpc
@@ -111,7 +112,11 @@ def run():
     )
 
     try:
+        start_time = time.perf_counter()
         response = stub.AuthorizationCheck(request)
+        end_time = time.perf_counter()
+        execution_time_ms = (end_time - start_time) * 1000  # Converti in millisecondi
+        print(f"Execution Time: {execution_time_ms:.3f} ms")
         # print(f"Decision: {response.Decision}")
         # print(f"RequestID: {response.RequestID}")
         # for eval in response.Evaluations:
