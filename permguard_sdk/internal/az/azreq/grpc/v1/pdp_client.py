@@ -18,8 +18,8 @@ import grpc
 from google.protobuf.struct_pb2 import Struct
 from google.protobuf.json_format import MessageToJson
 
-from permguard_sdk.az.azreq.model import AZRequest, AZResponse
-from permguard_sdk.internal.az.azreq.grpc.v1 import pdp_pb2, pdp_pb2_grpc
+from permguard.az.azreq.model import AZRequest, AZResponse
+from permguard.internal.az.azreq.grpc.v1 import pdp_pb2, pdp_pb2_grpc
 
 
 def dict_to_struct(data: dict) -> Struct:

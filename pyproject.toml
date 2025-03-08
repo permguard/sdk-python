@@ -45,7 +45,7 @@ Documentation = "https://www.permguard.com"
 Source = "https://github.com/permguard/permguard"
 
 [tool.hatch.version]
-path = "permguard_sdk/__about__.py"
+path = "permguard/__about__.py"
 
 [tool.mypy]
 disallow_any_generics = true
@@ -146,8 +146,8 @@ ban-relative-imports = "all"
 branch = true
 parallel = true
 omit = [
-  "permguard_sdk/__about__.py",
-  "permguard_sdk/**/__init__.py",
+  "permguard/__about__.py",
+  "permguard/**/__init__.py",
 ]
 
 [tool.coverage.report]

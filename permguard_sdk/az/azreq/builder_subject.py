@@ -15,7 +15,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from typing import Any
-from permguard_sdk.az.azreq.model import Subject
+from permguard.az.azreq.model import Subject
 
 
 # Valore predefinito per Subject

@@ -16,9 +16,9 @@
 
 from typing import Optional, Tuple
 
-from permguard_sdk.internal.az.azreq.grpc.v1.pdp_client import authorization_check
-from permguard_sdk.az_config import AZConfig, AZEndpoint
-from permguard_sdk.az.azreq.model import AZRequest, AZResponse
+from permguard.internal.az.azreq.grpc.v1.pdp_client import authorization_check
+from permguard.az_config import AZConfig, AZEndpoint
+from permguard.az.azreq.model import AZRequest, AZResponse
 
 
 class AZClient:

@@ -16,12 +16,12 @@
 
 from typing import Dict, Any, List
 
-from permguard_sdk.az.azreq.model import AZRequest, Principal
-from permguard_sdk.az.azreq.builder_subject import SubjectBuilder
-from permguard_sdk.az.azreq.builder_resource import ResourceBuilder
-from permguard_sdk.az.azreq.builder_action import ActionBuilder
-from permguard_sdk.az.azreq.builder_context import ContextBuilder
-from permguard_sdk.az.azreq.builder_request_composed import AZRequestBuilder
+from permguard.az.azreq.model import AZRequest, Principal
+from permguard.az.azreq.builder_subject import SubjectBuilder
+from permguard.az.azreq.builder_resource import ResourceBuilder
+from permguard.az.azreq.builder_action import ActionBuilder
+from permguard.az.azreq.builder_context import ContextBuilder
+from permguard.az.azreq.builder_request_composed import AZRequestBuilder
 
 
 # Costanti per i tipi di subject

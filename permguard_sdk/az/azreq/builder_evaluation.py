@@ -16,7 +16,7 @@
 
 from typing import Dict, Any
 
-from permguard_sdk.az.azreq.model import Evaluation, Subject, Resource, Action
+from permguard.az.azreq.model import Evaluation, Subject, Resource, Action
 
 
 class EvaluationBuilder:

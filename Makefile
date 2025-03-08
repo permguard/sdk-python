@@ -15,7 +15,7 @@ envdown:
 	hatch env prune && hatch env remove
 
 protoc:
-	python -m grpc_tools.protoc --proto_path=./proto/v1 ./proto/v1/pdp.proto --python_out=. --grpc_python_out=./permguard_sdk/internal/az/azreq/grpc/v1
+	python -m grpc_tools.protoc --proto_path=./proto/v1 ./proto/v1/pdp.proto --python_out=. --grpc_python_out=./permguard/internal/az/azreq/grpc/v1
 
 # disallow any parallelism (-j) for Make. This is necessary since some
 # commands during the build process create temporary files that collide

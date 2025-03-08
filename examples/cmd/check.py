@@ -16,17 +16,17 @@
 
 import json
 
-from permguard_sdk.az.azreq.builder_action import ActionBuilder
-from permguard_sdk.az.azreq.builder_context import ContextBuilder
-from permguard_sdk.az.azreq.builder_evaluation import EvaluationBuilder
-from permguard_sdk.az.azreq.builder_principal import PrincipalBuilder
-from permguard_sdk.az.azreq.builder_request_atomic import AZAtomicRequestBuilder
-from permguard_sdk.az.azreq.builder_request_composed import AZRequestBuilder
-from permguard_sdk.az.azreq.builder_resource import ResourceBuilder
-from permguard_sdk.az.azreq.builder_subject import SubjectBuilder
-from permguard_sdk.az.azreq.model import AZRequest
-from permguard_sdk.az_client import AZClient
-from permguard_sdk.az_config import with_endpoint
+from permguard.az.azreq.builder_action import ActionBuilder
+from permguard.az.azreq.builder_context import ContextBuilder
+from permguard.az.azreq.builder_evaluation import EvaluationBuilder
+from permguard.az.azreq.builder_principal import PrincipalBuilder
+from permguard.az.azreq.builder_request_atomic import AZAtomicRequestBuilder
+from permguard.az.azreq.builder_request_composed import AZRequestBuilder
+from permguard.az.azreq.builder_resource import ResourceBuilder
+from permguard.az.azreq.builder_subject import SubjectBuilder
+from permguard.az.azreq.model import AZRequest
+from permguard.az_client import AZClient
+from permguard.az_config import with_endpoint
 
 
 with open("./examples/cmd/requests/ok_onlyone1.json", "r") as f:

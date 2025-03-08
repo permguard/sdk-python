@@ -12,7 +12,7 @@ exclude = [
 ]
 
 [build.targets.wheel]
-packages = ["permguard_sdk"]
+packages = ["permguard"]
 
 [build.targets.wheel.hooks.mypyc]
 enable-by-default = false
@@ -45,7 +45,7 @@ dependencies = [
 ]
 
 [envs.lint.scripts]
-typing = "mypy --install-types --allow-subclassing-any --non-interactive {args:permguard_sdk tests}"
+typing = "mypy --install-types --allow-subclassing-any --non-interactive {args:permguard tests}"
 style = [
   "ruff {args:.}",
   "black --check --diff {args:.}",
@@ -64,7 +64,7 @@ all = [
 version = "python --version"
 protoc = "make protoc"
 check = "python ./examples/cmd/check.py"
-cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=permguard_sdk --cov=tests {args}"
+cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=permguard --cov=tests {args}"
 no-cov = "cov --no-cov {args}"
 dev = "pytest -p no:randomly --no-cov {args:tests}"
 

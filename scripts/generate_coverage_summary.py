@@ -5,7 +5,7 @@ from pathlib import Path
 from lxml import etree  # nosec B410
 
 PACKAGES = {
-    'permguard_sdk/': 'permguard_sdk',
+    'permguard/': 'permguard',
     'tests/': 'tests',
 }
 

@@ -15,7 +15,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from typing import Any
-from permguard_sdk.az.azreq.model import Resource
+from permguard.az.azreq.model import Resource
 
 
 class ResourceBuilder:

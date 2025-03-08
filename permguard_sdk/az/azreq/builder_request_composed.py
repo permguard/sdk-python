@@ -15,7 +15,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from typing import Dict, Any, List
-from permguard_sdk.az.azreq.model import (
+from permguard.az.azreq.model import (
     AZRequest, AZModel, PolicyStore, Entities, Principal, Subject, Resource, Action, Evaluation
 )
 

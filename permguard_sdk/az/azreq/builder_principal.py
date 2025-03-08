@@ -14,7 +14,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from permguard_sdk.az.azreq.model import Principal
+from permguard.az.azreq.model import Principal
 
 
 # Valore predefinito per Principal

@@ -16,7 +16,7 @@
 
 from typing import Any
 
-from permguard_sdk.az.azreq.model import Action
+from permguard.az.azreq.model import Action
 
 
 class ActionBuilder:
