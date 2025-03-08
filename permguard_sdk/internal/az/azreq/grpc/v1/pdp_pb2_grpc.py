@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-import pdp_pb2 as pdp__pb2
+import permguard_sdk.internal.az.azreq.grpc.v1.pdp_pb2 as pdp__pb2
 
 GRPC_GENERATED_VERSION = '1.70.0'
 GRPC_VERSION = grpc.__version__
