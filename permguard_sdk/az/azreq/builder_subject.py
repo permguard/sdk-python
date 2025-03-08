@@ -14,71 +14,56 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from copy import deepcopy
+from typing import Any
+from permguard_sdk.az.azreq.model import Subject
 
 
-# Constants
-SUBJECT_DEFAULT_KIND = "USER"
-USER_TYPE = "USER"
-ROLE_ACTOR_TYPE = "ROLE-ACTOR"
-TWIN_ACTOR_TYPE = "TWIN-ACTOR"
+# Valore predefinito per Subject
+SUBJECT_DEFAULT_KIND = "user"
 
-
-class Subject:
-    """Class representing a subject."""
-    def __init__(self, id: str):
-        self.id = id
-        self.type = SUBJECT_DEFAULT_KIND
-        self.source = None
-        self.properties = None
+# Tipi di Subject
+USER_TYPE = "user"
+ROLE_ACTOR_TYPE = "role-actor"
+TWIN_ACTOR_TYPE = "twin-actor"
 
 
 class SubjectBuilder:
-    """Builder for the Subject object."""
+    """Builder for creating a Subject object."""
+
     def __init__(self, id: str):
-        # Initialize the builder with a new Subject instance
-        self.subject = Subject(id)
+        """Initialize the builder with a default subject type."""
+        self._subject = Subject(id=id, type=SUBJECT_DEFAULT_KIND, properties={})
 
-    def with_user_type(self) -> 'SubjectBuilder':
-        """Sets the type of the subject to UserType for the AZRequest."""
-        self.subject.type = USER_TYPE
+    def with_user_type(self) -> "SubjectBuilder":
+        """Set the subject type to USER."""
+        self._subject.type = USER_TYPE
         return self
 
-    def with_role_actor_type(self) -> 'SubjectBuilder':
-        """Sets the type of the subject to RoleActorType for the AZRequest."""
-        self.subject.type = ROLE_ACTOR_TYPE
+    def with_role_actor_type(self) -> "SubjectBuilder":
+        """Set the subject type to ROLE-ACTOR."""
+        self._subject.type = ROLE_ACTOR_TYPE
         return self
 
-    def with_twin_actor_type(self) -> 'SubjectBuilder':
-        """Sets the type of the subject to TwinActorType for the AZRequest."""
-        self.subject.type = TWIN_ACTOR_TYPE
+    def with_twin_actor_type(self) -> "SubjectBuilder":
+        """Set the subject type to TWIN-ACTOR."""
+        self._subject.type = TWIN_ACTOR_TYPE
         return self
 
-    def with_type(self, subject_type: str) -> 'SubjectBuilder':
-        """Sets the type of the subject."""
-        self.subject.type = subject_type
+    def with_type(self, sub_type: str) -> "SubjectBuilder":
+        """Set the subject type."""
+        self._subject.type = sub_type
         return self
 
-    def with_source(self, source: str) -> 'SubjectBuilder':
-        """Sets the source of the subject."""
-        self.subject.source = source
+    def with_source(self, source: str) -> "SubjectBuilder":
+        """Set the source of the subject."""
+        self._subject.source = source
         return self
 
-    def with_property(self, key: str, value: any) -> 'SubjectBuilder':
-        """Sets a property of the subject."""
-        # Initialize properties dictionary if it doesn't exist
-        if self.subject.properties is None:
-            self.subject.properties = {}
-        self.subject.properties[key] = value
+    def with_property(self, key: str, value: Any) -> "SubjectBuilder":
+        """Set a property of the subject."""
+        self._subject.properties[key] = value
         return self
 
     def build(self) -> Subject:
-        """Builds and returns the Subject object with a deep copy of properties."""
-        # Create a new Subject instance with the same ID
-        instance = Subject(self.subject.id)
-        # Copy the type, source, and properties
-        instance.type = self.subject.type
-        instance.source = self.subject.source
-        # Deep copy the properties if they exist, otherwise keep as None
-        instance.properties = deepcopy(self.subject.properties) if self.subject.properties else None
-        return instance
+        """Build and return the Subject object."""
+        return self._subject.model_copy(deep=True)

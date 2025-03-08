@@ -14,42 +14,27 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from copy import deepcopy
-
-
-class Resource:
-    """Class representing a resource."""
-    def __init__(self, kind: str):
-        self.type = kind
-        self.id = None
-        self.properties = None
+from typing import Any
+from permguard_sdk.az.azreq.model import Resource
 
 
 class ResourceBuilder:
-    """Builder for the Resource object."""
-    def __init__(self, kind: str):
-        # Initialize the builder with a new Resource instance
-        self.resource = Resource(kind)
+    """Builder for creating a Resource object."""
 
-    def with_id(self, id: str) -> 'ResourceBuilder':
-        """Sets the ID of the resource."""
-        self.resource.id = id
+    def __init__(self, kind: str):
+        """Initialize the builder with a resource type."""
+        self._resource = Resource(type=kind, properties={})
+
+    def with_id(self, id: str) -> "ResourceBuilder":
+        """Set the ID of the resource."""
+        self._resource.id = id
         return self
 
-    def with_property(self, key: str, value: any) -> 'ResourceBuilder':
-        """Sets a property of the resource."""
-        # Initialize properties dictionary if it doesn't exist
-        if self.resource.properties is None:
-            self.resource.properties = {}
-        self.resource.properties[key] = value
+    def with_property(self, key: str, value: Any) -> "ResourceBuilder":
+        """Set a property of the resource."""
+        self._resource.properties[key] = value
         return self
 
     def build(self) -> Resource:
-        """Builds and returns the Resource object with a deep copy of properties."""
-        # Create a new Resource instance with the same type
-        instance = Resource(self.resource.type)
-        # Copy the ID
-        instance.id = self.resource.id
-        # Deep copy the properties if they exist, otherwise keep as None
-        instance.properties = deepcopy(self.resource.properties) if self.resource.properties else None
-        return instance
+        """Build and return the Resource object."""
+        return self._resource.model_copy(deep=True)

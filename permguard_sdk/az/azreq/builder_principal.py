@@ -14,36 +14,30 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-# Constant for the default principal kind
+from permguard_sdk.az.azreq.model import Principal
+
+
+# Valore predefinito per Principal
 PRINCIPAL_DEFAULT_KIND = "user"
 
 
-class Principal:
-    """Class representing a principal."""
-    def __init__(self, id: str):
-        self.id = id
-        self.type = PRINCIPAL_DEFAULT_KIND
-        self.source = None
-
-
 class PrincipalBuilder:
-    """Builder for the Principal object."""
+    """Builder for creating a Principal object."""
+
     def __init__(self, id: str):
-        self.principal = Principal(id)
+        """Initialize the builder with a default principal type."""
+        self._principal = Principal(id=id, type=PRINCIPAL_DEFAULT_KIND)
 
-    def with_kind(self, kind: str) -> 'PrincipalBuilder':
-        """Sets the kind of the principal."""
-        self.principal.type = kind
+    def with_kind(self, kind: str) -> "PrincipalBuilder":
+        """Set the kind/type of the principal."""
+        self._principal.type = kind
         return self
 
-    def with_source(self, source: str) -> 'PrincipalBuilder':
-        """Sets the source of the principal."""
-        self.principal.source = source
+    def with_source(self, source: str) -> "PrincipalBuilder":
+        """Set the source of the principal."""
+        self._principal.source = source
         return self
 
-    def build(self) -> 'Principal':
-        """Builds and returns the Principal object."""
-        instance = Principal(self.principal.id)
-        instance.type = self.principal.type
-        instance.source = self.principal.source
-        return instance
+    def build(self) -> Principal:
+        """Build and return the Principal object."""
+        return self._principal.model_copy(deep=True)

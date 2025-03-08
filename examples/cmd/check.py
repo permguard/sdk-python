@@ -14,119 +14,168 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import time
-import grpc
-from permguard_sdk.internal.az.azreq.grpc.v1 import pdp_pb2
-from permguard_sdk.internal.az.azreq.grpc.v1 import pdp_pb2_grpc
-from google.protobuf.struct_pb2 import Struct
-from google.protobuf.json_format import MessageToJson
+import json
 
-def run():
-    channel = grpc.insecure_channel('localhost:9094')
-    stub = pdp_pb2_grpc.V1PDPServiceStub(channel)
+from permguard_sdk.az.azreq.builder_action import ActionBuilder
+from permguard_sdk.az.azreq.builder_context import ContextBuilder
+from permguard_sdk.az.azreq.builder_evaluation import EvaluationBuilder
+from permguard_sdk.az.azreq.builder_principal import PrincipalBuilder
+from permguard_sdk.az.azreq.builder_request_atomic import AZAtomicRequestBuilder
+from permguard_sdk.az.azreq.builder_request_composed import AZRequestBuilder
+from permguard_sdk.az.azreq.builder_resource import ResourceBuilder
+from permguard_sdk.az.azreq.builder_subject import SubjectBuilder
+from permguard_sdk.az_client import AZClient
+from permguard_sdk.az_config import with_endpoint
 
-    entities_item = Struct()
-    entities_item.update({
-        "uid": {
-            "type": "MagicFarmacia::Platform::BranchInfo",
-            "id": "subscription"
-        },
-        "attrs": {
-            "active": True
-        },
-        "parents": []
-    })
 
-    subject_properties = Struct()
-    subject_properties.update({"isSuperUser": True})
+# Caricamento del file JSON incorporato (equivalente a `//go:embed`)
+with open("./examples/cmd/requests/ok_onlyone1.json", "r") as f:
+    json_file = f.read()
 
-    context_struct = Struct()
-    context_struct.update({
-        "time": "2025-01-23T16:17:46+00:00",
-        "isSubscriptionActive": True
-    })
 
-    resource_properties = Struct()
-    resource_properties.update({"isEnabled": True})
-
-    action_properties_enabled = Struct()
-    action_properties_enabled.update({"isEnabled": True})
-
-    action_properties_disabled = Struct()
-    action_properties_disabled.update({"isEnabled": False})
-
-    auth_model = pdp_pb2.AuthorizationModelRequest(
-        ZoneID=895741663247,
-        PolicyStore=pdp_pb2.PolicyStore(
-            Kind="ledger",
-            ID="809257ed202e40cab7e958218eecad20"
-        ),
-        Principal=pdp_pb2.Principal(
-            Type="user",
-            ID="amy.smith@acmecorp.com",
-            Source="keycloak"
-        ),
-        Entities=pdp_pb2.Entities(
-            Schema="cedar",
-            Items=[entities_item]
-        )
-    )
-
-    eval_request1 = pdp_pb2.EvaluationRequest(
-        RequestID="exz1",
-        Resource=pdp_pb2.Resource(
-            Type="MagicFarmacia::Platform::Subscription",
-            ID="e3a786fd07e24bfa95ba4341d3695ae8",
-            Properties=resource_properties
-        ),
-        Action=pdp_pb2.Action(
-            Name="MagicFarmacia::Platform::Action::create",
-            Properties=action_properties_enabled
-        )
-    )
-
-    eval_request2 = pdp_pb2.EvaluationRequest(
-        RequestID="exz2",
-        Resource=pdp_pb2.Resource(
-            Type="MagicFarmacia::Platform::Subscription",
-            ID="e3a786fd07e24bfa95ba4341d3695ae8",
-            Properties=resource_properties
-        ),
-        Action=pdp_pb2.Action(
-            Name="MagicFarmacia::Platform::Action::create",
-            Properties=action_properties_disabled
-        )
-    )
-
-    request = pdp_pb2.AuthorizationCheckRequest(
-        AuthorizationModel=auth_model,
-        RequestID="abc1",
-        Subject=pdp_pb2.Subject(
-            Type="role-actor",
-            ID="platform-creator",
-            Source="keycloak",
-            Properties=subject_properties
-        ),
-        Context=context_struct,
-        Evaluations=[eval_request1, eval_request2]
-    )
+def check_json_request():
+    """Check an authorization request from a JSON file."""
+    az_client = AZClient(with_endpoint("localhost", 9094))
 
     try:
-        start_time = time.perf_counter()
-        response = stub.AuthorizationCheck(request)
-        end_time = time.perf_counter()
-        execution_time_ms = (end_time - start_time) * 1000  # Converti in millisecondi
-        print(f"Execution Time: {execution_time_ms:.3f} ms")
-        # print(f"Decision: {response.Decision}")
-        # print(f"RequestID: {response.RequestID}")
-        # for eval in response.Evaluations:
-        #     print(f"Evaluation RequestID: {eval.RequestID}, Decision: {eval.Decision}")
-        json_string = MessageToJson(response, indent=2)
-        print(json_string)
-    except grpc.RpcError as e:
-        print(f"Error: {e.code()} - {e.details()}")
-    finally:
-        channel.close()
+        # Deserializza la richiesta JSON in un oggetto AZRequest
+        req = AZRequestBuilder.model_validate_json(json_file)
+    except json.JSONDecodeError:
+        print("❌ Authorization request deserialization failed")
+        return
 
+    # Effettua la verifica di autorizzazione
+    decision, response, _ = az_client.check(req)
+    print_authorization_result(decision, response)
+
+
+def check_atomic_evaluation():
+    """Check an atomic authorization evaluation."""
+    az_client = AZClient(with_endpoint("localhost", 9094))
+
+    # Creazione del Principal
+    principal = PrincipalBuilder("amy.smith@acmecorp.com").build()
+
+    # Creazione delle entità
+    entities = [
+        {
+            "uid": {"type": "MagicFarmacia::Platform::BranchInfo", "id": "subscription"},
+            "attrs": {"active": True},
+            "parents": [],
+        }
+    ]
+
+    # Creazione della richiesta di autorizzazione
+    req = (
+        AZAtomicRequestBuilder(
+            895741663247,
+            "809257ed202e40cab7e958218eecad20",
+            "platform-creator",
+            "MagicFarmacia::Platform::Subscription",
+            "MagicFarmacia::Platform::Action::create",
+        )
+        .with_request_id("1234")
+        .with_principal(principal)
+        .with_entities_items("cedar", entities)
+        .with_subject_role_actor_type()
+        .with_subject_source("keycloack")
+        .with_subject_property("isSuperUser", True)
+        .with_resource_id("e3a786fd07e24bfa95ba4341d3695ae8")
+        .with_resource_property("isEnabled", True)
+        .with_action_property("isEnabled", True)
+        .with_context_property("time", "2025-01-23T16:17:46+00:00")
+        .with_context_property("isSubscriptionActive", True)
+        .build()
+    )
+
+    # Effettua la verifica di autorizzazione
+    decision, response, _ = az_client.check(req)
+    print_authorization_result(decision, response)
+
+
+def check_multiple_evaluations():
+    """Check multiple authorization evaluations."""
+    az_client = AZClient(with_endpoint("localhost", 9094))
+
+    # Creazione del Subject
+    subject = (
+        SubjectBuilder("platform-creator")
+        .with_role_actor_type()
+        .with_source("keycloack")
+        .with_property("isSuperUser", True)
+        .build()
+    )
+
+    # Creazione della Risorsa
+    resource = (
+        ResourceBuilder("MagicFarmacia::Platform::Subscription")
+        .with_id("e3a786fd07e24bfa95ba4341d3695ae8")
+        .with_property("isEnabled", True)
+        .build()
+    )
+
+    # Creazione delle Azioni
+    action_view = ActionBuilder("MagicFarmacia::Platform::Action::view").with_property("isEnabled", True).build()
+    action_create = ActionBuilder("MagicFarmacia::Platform::Action::create").with_property("isEnabled", True).build()
+
+    # Creazione del Context
+    context = (
+        ContextBuilder()
+        .with_property("time", "2025-01-23T16:17:46+00:00")
+        .with_property("isSubscriptionActive", True)
+        .build()
+    )
+
+    # Creazione delle Valutazioni
+    evaluation_view = EvaluationBuilder(subject, resource, action_view).with_request_id("1234").with_context(context).build()
+    evaluation_create = EvaluationBuilder(subject, resource, action_create).with_request_id("7890").with_context(context).build()
+
+    # Creazione del Principal
+    principal = PrincipalBuilder("amy.smith@acmecorp.com").build()
+
+    # Creazione delle entità
+    entities = [
+        {
+            "uid": {"type": "MagicFarmacia::Platform::BranchInfo", "id": "subscription"},
+            "attrs": {"active": True},
+            "parents": [],
+        }
+    ]
+
+    # Creazione della richiesta di autorizzazione
+    req = (
+        AZRequestBuilder(895741663247, "809257ed202e40cab7e958218eecad20")
+        .with_principal(principal)
+        .with_entities_items("cedar", entities)
+        .with_evaluation(evaluation_view)
+        .with_evaluation(evaluation_create)
+        .build()
+    )
+
+    # Effettua la verifica di autorizzazione
+    decision, response, _ = az_client.check(req)
+    print_authorization_result(decision, response)
+
+
+def print_authorization_result(decision, response):
+    """Print the result of an authorization request."""
+    if decision:
+        print("✅ Authorization Permitted")
+    else:
+        print("❌ Authorization Denied")
+        if response and response.context:
+            if response.context.reason_admin:
+                print(f"-> Reason Admin: {response.context.reason_admin.message}")
+            if response.context.reason_user:
+                print(f"-> Reason User: {response.context.reason_user.message}")
+            for eval in response.evaluations:
+                if eval.context and eval.context.reason_user:
+                    print(f"-> Reason Admin: {eval.context.reason_admin.message}")
+                    print(f"-> Reason User: {eval.context.reason_user.message}")
+
+
+# Esegui i test
 if __name__ == "__main__":
-    run()
+    #check_json_request()
+    check_atomic_evaluation()
+    #check_multiple_evaluations()

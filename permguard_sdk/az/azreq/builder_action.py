@@ -14,30 +14,23 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from copy import deepcopy
+from typing import Any
 
-
-class Action:
-    """Class representing an action."""
-    def __init__(self, name: str):
-        self.name = name
-        self.properties = None
+from permguard_sdk.az.azreq.model import Action
 
 
 class ActionBuilder:
-    """Builder for creating Action objects."""
-    def __init__(self, name: str):
-        self.action = Action(name)
+    """Builder for creating an Action object."""
 
-    def with_property(self, key: str, value: any) -> 'ActionBuilder':
-        """Sets a property for the action."""
-        if self.action.properties is None:
-            self.action.properties = {}
-        self.action.properties[key] = value
+    def __init__(self, name: str):
+        """Initialize the builder with an action name."""
+        self._action = Action(name=name, properties={})
+
+    def with_property(self, key: str, value: Any) -> "ActionBuilder":
+        """Set a property for the action."""
+        self._action.properties[key] = value
         return self
 
     def build(self) -> Action:
-        """Builds and returns the Action object with a deep copy of properties."""
-        instance = Action(self.action.name)
-        instance.properties = deepcopy(self.action.properties) if self.action.properties else None
-        return instance
+        """Build and return the Action object with a deep copy of properties."""
+        return self._action.model_copy(deep=True)

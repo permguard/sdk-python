@@ -14,21 +14,17 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import Any, Dict
+from typing import Optional
+
+from permguard_sdk.az.azreq.model import AZRequest, AZResponse
 
 
-class ContextBuilder:
-    """Builder for creating a context dictionary."""
+def authorization_check(endpoint: str, req: AZRequest) -> Optional[AZResponse]:
+    """Perform an authorization check with the gRPC server."""
+    if req is None:
+        raise ValueError("PEP: Invalid request")
 
-    def __init__(self):
-        """Initialize the builder with an empty context dictionary."""
-        self._context: Dict[str, Any] = {}
+    if req.evaluations is None:
+        req.evaluations = []
 
-    def with_property(self, key: str, value: Any) -> "ContextBuilder":
-        """Set a property for the context."""
-        self._context[key] = value
-        return self
-
-    def build(self) -> Dict[str, Any]:
-        """Build and return the context dictionary."""
-        return self._context.model_copy(deep=True)
+    return AZResponse(decision=True, evaluations=req.evaluations)

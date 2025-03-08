@@ -14,52 +14,33 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from copy import deepcopy
+from typing import Dict, Any
 
-
-class Subject:
-    """Placeholder class for Subject (to be defined as needed)."""
-    pass
-
-
-class Resource:
-    """Placeholder class for Resource (to be defined as needed)."""
-    pass
-
-
-class Action:
-    """Placeholder class for Action (to be defined as needed)."""
-    pass
-
-
-class Evaluation:
-    """Class representing an evaluation."""
-    def __init__(self, subject: 'Subject', resource: 'Resource', action: 'Action'):
-        self.subject = subject
-        self.resource = resource
-        self.action = action
-        self.request_id = None
-        self.context = None
+from permguard_sdk.az.azreq.model import Evaluation, Subject, Resource, Action
 
 
 class EvaluationBuilder:
-    """Builder for the Evaluation object."""
-    def __init__(self, subject: 'Subject', resource: 'Resource', action: 'Action'):
-        self.az_evaluation = Evaluation(subject, resource, action)
+    """Builder for creating an Evaluation object."""
 
-    def with_request_id(self, request_id: str) -> 'EvaluationBuilder':
-        """Sets the request ID of the Evaluation."""
-        self.az_evaluation.request_id = request_id
+    def __init__(self, subject: Subject, resource: Resource, action: Action):
+        """Initialize the builder with required subject, resource, and action."""
+        self._evaluation = Evaluation(
+            subject=subject,
+            resource=resource,
+            action=action,
+            context={}
+        )
+
+    def with_request_id(self, request_id: str) -> "EvaluationBuilder":
+        """Set the request ID of the Evaluation."""
+        self._evaluation.request_id = request_id
         return self
 
-    def with_context(self, context: dict) -> 'EvaluationBuilder':
-        """Sets the context of the Evaluation."""
-        self.az_evaluation.context = context
+    def with_context(self, context: Dict[str, Any]) -> "EvaluationBuilder":
+        """Set the context of the Evaluation."""
+        self._evaluation.context = context
         return self
 
-    def build(self) -> 'Evaluation':
-        """Builds and returns the Evaluation object with a deep copy of the context."""
-        instance = Evaluation(self.az_evaluation.subject, self.az_evaluation.resource, self.az_evaluation.action)
-        instance.request_id = self.az_evaluation.request_id
-        instance.context = deepcopy(self.az_evaluation.context) if self.az_evaluation.context else None
-        return instance
+    def build(self) -> Evaluation:
+        """Build and return the Evaluation object."""
+        return self._evaluation.model_copy(deep=True)
