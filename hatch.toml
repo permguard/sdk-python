@@ -33,6 +33,7 @@ dependencies = [
   "pytest-xdist",
   "trustme",
   "grpcio-tools~=1.70.0",
+  "mypy-protobuf~=3.6.0",
 ]
 
 [envs.lint]
