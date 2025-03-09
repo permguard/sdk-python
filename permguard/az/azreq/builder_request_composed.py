@@ -21,8 +21,8 @@ from permguard.az.azreq.model import (
 
 
 # Costanti per i tipi di store
-POLICY_STORE_KIND = "ledger"
-CEDAR_ENTITY_KIND = "cedar"
+POLICY_STORE_KIND = "LEDGER"
+CEDAR_ENTITY_KIND = "CEDAR"
 
 
 class AZRequestBuilder:
