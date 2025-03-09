@@ -45,6 +45,12 @@ pip install permguard
 Below is a sample Python code demonstrating how to create a Permguard client, build an authorization request using a builder pattern, and process the authorization response:
 
 ```python
+from permguard.az.azreq.builder_principal import PrincipalBuilder
+from permguard.az.azreq.builder_request_atomic import AZAtomicRequestBuilder
+from permguard.az_client import AZClient
+from permguard.az_config import with_endpoint
+
+
 az_client = AZClient(with_endpoint("localhost", 9094))
 
 principal = PrincipalBuilder("amy.smith@acmecorp.com").build()
