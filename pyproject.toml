@@ -7,7 +7,7 @@ name = "permguard"
 description = 'Permguard Python SDK (Authorization Check) - https://www.permguard.com'
 readme = "README.md"
 requires-python = ">=3.8"
-license = "apache-2.0"
+license = "Apache-2.0"
 keywords = [
   "Permguard",
   "Nitro Agility S.r.l."
