@@ -18,7 +18,7 @@ authors = [
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Developers",
-  "License :: Other/Proprietary License",
+  "License :: Apache-2.0",
   "Natural Language :: English",
   "Operating System :: OS Independent",
   "Programming Language :: Python",
