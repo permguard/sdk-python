@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "permguard"
-description = 'Permguard Python SDK (Authorization Check) - https://www.permguard.com'
+description = 'The official Python SDK for Permguard (https://www.permguard.com)'
 readme = "README.md"
 requires-python = ">=3.8"
 license = "Apache-2.0"
