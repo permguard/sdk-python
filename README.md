@@ -6,9 +6,10 @@
 [![Documentation](https://img.shields.io/website?label=Docs&url=https%3A%2F%2Fwww.permguard.com%2F)](https://www.permguard.com/)
 [![Build, test and publish the artifacts](https://github.com/permguard/sdk-python/actions/workflows/sdk-python-ci.yml/badge.svg)](https://github.com/permguard/sdk-python/actions/workflows/sdk-python-ci.yml)
 
-<p align="left">
-  <img src="https://raw.githubusercontent.com/permguard/permguard-assets/main/pink-txt//1line.svg" class="center" width="400px" height="auto"/>
-</p>
+[![Watch the video on YouTube](https://raw.githubusercontent.com/permguard/permguard-assets/refs/heads/main/video/permguard-thumbnail-preview.png)](https://youtu.be/cH_boKCpLQ8?si=i1fWFHT5kxQQJoYN)
+
+[Watch the video on YouTube](https://youtu.be/cH_boKCpLQ8?si=i1fWFHT5kxQQJoYN)
+
 
 The Permguard Python SDK provides a simple and flexible client to perform authorization checks against a Permguard Policy Decision Point (PDP) service using gRPC.
 Plase refer to the [Permguard Documentation](https://www.permguard.com/) for more information.
