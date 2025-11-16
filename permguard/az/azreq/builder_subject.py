@@ -17,14 +17,13 @@
 from typing import Any
 from permguard.az.azreq.model import Subject
 
-
-# Valore predefinito per Subject
-SUBJECT_DEFAULT_KIND = "user"
-
-# Tipi di Subject
+# Subject default kind
 USER_TYPE = "user"
 WORKLOAD_TYPE = "workload"
+ATTRIBUTE_TYPE = "attribute"
 
+# Default values
+SUBJECT_DEFAULT_KIND = USER_TYPE
 
 class SubjectBuilder:
     """Builder for creating a Subject object."""
@@ -41,6 +40,11 @@ class SubjectBuilder:
     def with_workload_type(self) -> "SubjectBuilder":
         """Set the subject type to WORKLOAD."""
         self._subject.type = WORKLOAD_TYPE
+        return self
+    
+    def with_attribute_type(self) -> "SubjectBuilder":
+        """Set the subject type to ATTRIBUTE."""
+        self._subject.type = ATTRIBUTE_TYPE
         return self
 
     def with_type(self, sub_type: str) -> "SubjectBuilder":

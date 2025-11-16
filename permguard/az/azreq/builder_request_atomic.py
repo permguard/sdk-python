@@ -24,9 +24,10 @@ from permguard.az.azreq.builder_context import ContextBuilder
 from permguard.az.azreq.builder_request_composed import AZRequestBuilder
 
 
-# Costanti per i tipi di subject
+# Constans for subject types
 USER_TYPE = "user"
 WORKLOAD_TYPE = "workload"
+ATTRIBUTE_TYPE = "attribute"
 
 
 class AZAtomicRequestBuilder:
@@ -63,17 +64,17 @@ class AZAtomicRequestBuilder:
         return self
 
     def with_subject_user_type(self) -> "AZAtomicRequestBuilder":
-        """Set the subject type to USER."""
+        """Set the subject type to User."""
         self._az_subject_builder.with_type(USER_TYPE)
         return self
 
-    def with_subject_role_actor_type(self) -> "AZAtomicRequestBuilder":
-        """Set the subject type to WORKLOAD."""
-        self._az_subject_builder.with_type(ROLE_ACTOR_TYPE)
+    def with_subject_attribute_type(self) -> "AZAtomicRequestBuilder":
+        """Set the subject type to Attribute."""
+        self._az_subject_builder.with_type(ATTRIBUTE_TYPE)
         return self
 
     def with_subject_workload_type(self) -> "AZAtomicRequestBuilder":
-        """Set the subject type to WORKLOAD."""
+        """Set the subject type to Workload."""
         self._az_subject_builder.with_type(WORKLOAD_TYPE)
         return self
 

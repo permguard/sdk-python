@@ -16,9 +16,13 @@
 
 from permguard.az.azreq.model import Principal
 
+# Subject default kind
+USER_TYPE = "user"
+WORKLOAD_TYPE = "workload"
+ATTRIBUTE_TYPE = "attribute"
 
-# Valore predefinito per Principal
-PRINCIPAL_DEFAULT_KIND = "user"
+# Default values
+PRINCIPAL_DEFAULT_KIND = USER_TYPE
 
 
 class PrincipalBuilder:
@@ -28,7 +32,22 @@ class PrincipalBuilder:
         """Initialize the builder with a default principal type."""
         self._principal = Principal(id=id, type=PRINCIPAL_DEFAULT_KIND)
 
-    def with_kind(self, kind: str) -> "PrincipalBuilder":
+    def with_user_type(self) -> "PrincipalBuilder":
+        """Set the kind/type of the principal to USER."""
+        self._principal.type = USER_TYPE
+        return self
+    
+    def with_workload_type(self) -> "PrincipalBuilder":
+        """Set the kind/type of the principal to WORKLOAD."""
+        self._principal.type = WORKLOAD_TYPE
+        return self 
+    
+    def with_attribute_type(self) -> "PrincipalBuilder":
+        """Set the kind/type of the principal to ATTRIBUTE."""
+        self._principal.type = ATTRIBUTE_TYPE
+        return self
+
+    def with_type(self, kind: str) -> "PrincipalBuilder":
         """Set the kind/type of the principal."""
         self._principal.type = kind
         return self

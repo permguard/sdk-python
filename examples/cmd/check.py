@@ -72,7 +72,7 @@ def check_atomic_evaluation():
         .with_request_id("1234")
         .with_principal(principal)
         .with_entities_items("cedar", entities)
-        .with_subject_role_actor_type()
+        .with_subject_attribute_type()
         .with_subject_source("keycloack")
         .with_subject_property("isSuperUser", True)
         .with_resource_id("e3a786fd07e24bfa95ba4341d3695ae8")
@@ -93,7 +93,7 @@ def check_multiple_evaluations():
 
     subject = (
         SubjectBuilder("platform-creator")
-        .with_role_actor_type()
+        .with_attibute_type()
         .with_source("keycloack")
         .with_property("isSuperUser", True)
         .build()
