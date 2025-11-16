@@ -23,8 +23,7 @@ SUBJECT_DEFAULT_KIND = "user"
 
 # Tipi di Subject
 USER_TYPE = "user"
-ROLE_ACTOR_TYPE = "role-actor"
-TWIN_ACTOR_TYPE = "twin-actor"
+WORKLOAD_TYPE = "workload"
 
 
 class SubjectBuilder:
@@ -39,14 +38,9 @@ class SubjectBuilder:
         self._subject.type = USER_TYPE
         return self
 
-    def with_role_actor_type(self) -> "SubjectBuilder":
-        """Set the subject type to ROLE-ACTOR."""
-        self._subject.type = ROLE_ACTOR_TYPE
-        return self
-
-    def with_twin_actor_type(self) -> "SubjectBuilder":
-        """Set the subject type to TWIN-ACTOR."""
-        self._subject.type = TWIN_ACTOR_TYPE
+    def with_workload_type(self) -> "SubjectBuilder":
+        """Set the subject type to WORKLOAD."""
+        self._subject.type = WORKLOAD_TYPE
         return self
 
     def with_type(self, sub_type: str) -> "SubjectBuilder":

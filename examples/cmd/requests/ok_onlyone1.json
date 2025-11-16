@@ -28,7 +28,7 @@
   },
   "request_id": "abc1",
   "subject": {
-    "type": "role-actor",
+    "type": "workload",
     "id": "platform-creator",
     "source": "keycloak",
     "properties": {
