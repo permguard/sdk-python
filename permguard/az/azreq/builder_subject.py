@@ -34,17 +34,17 @@ class SubjectBuilder:
 
     def with_user_type(self) -> "SubjectBuilder":
         """Set the subject type to USER."""
-        self._subject.type = USER_TYPE
+        self.with_type(USER_TYPE)
         return self
 
     def with_workload_type(self) -> "SubjectBuilder":
         """Set the subject type to WORKLOAD."""
-        self._subject.type = WORKLOAD_TYPE
+        self.with_type(WORKLOAD_TYPE)
         return self
     
     def with_attribute_type(self) -> "SubjectBuilder":
         """Set the subject type to ATTRIBUTE."""
-        self._subject.type = ATTRIBUTE_TYPE
+        self.with_type(ATTRIBUTE_TYPE)
         return self
 
     def with_type(self, sub_type: str) -> "SubjectBuilder":

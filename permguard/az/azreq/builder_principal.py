@@ -34,22 +34,22 @@ class PrincipalBuilder:
 
     def with_user_type(self) -> "PrincipalBuilder":
         """Set the type of the principal to USER."""
-        self._principal.type = USER_TYPE
+        self.with_type(USER_TYPE)
         return self
     
     def with_workload_type(self) -> "PrincipalBuilder":
         """Set the type of the principal to WORKLOAD."""
-        self._principal.type = WORKLOAD_TYPE
+        self.with_type(WORKLOAD_TYPE)
         return self 
     
     def with_attribute_type(self) -> "PrincipalBuilder":
         """Set the type of the principal to ATTRIBUTE."""
-        self._principal.type = ATTRIBUTE_TYPE
+        self.with_type(ATTRIBUTE_TYPE)
         return self
 
     def with_type(self, kind: str) -> "PrincipalBuilder":
         """Set the type of the principal."""
-        self._principal.type = kind
+        self.with_type(kind)
         return self
 
     def with_source(self, source: str) -> "PrincipalBuilder":
