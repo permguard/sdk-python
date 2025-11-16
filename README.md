@@ -58,7 +58,7 @@ principal = PrincipalBuilder("amy.smith@acmecorp.com").build()
 
 entities = [
     {
-        "uid": {"type": "ZTMedFlow::Platform::BranchInfo", "id": "subscription"},
+        "uid": {"type": "PharmaAuthZFlow::Platform::BranchInfo", "id": "subscription"},
         "attrs": {"active": True},
         "parents": [],
     }
@@ -69,8 +69,8 @@ req = (
         895741663247,
         "809257ed202e40cab7e958218eecad20",
         "platform-creator",
-        "ZTMedFlow::Platform::Subscription",
-        "ZTMedFlow::Platform::Action::create",
+        "PharmaAuthZFlow::Platform::Subscription",
+        "PharmaAuthZFlow::Platform::Action::create",
     )
     .with_request_id("1234")
     .with_principal(principal)
