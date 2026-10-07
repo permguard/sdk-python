@@ -116,6 +116,8 @@ def _refusal(status: int, payload: Mapping[str, Any]) -> Refusal:
 def _http_class(status: int) -> str:
     if status in (HTTPStatus.BAD_REQUEST, HTTPStatus.UNPROCESSABLE_ENTITY):
         return 'validation'
+    if status == HTTPStatus.CONFLICT:
+        return 'conflict'
     if status in (HTTPStatus.UNAUTHORIZED, HTTPStatus.FORBIDDEN):
         return 'authorization'
     if status == HTTPStatus.NOT_FOUND:

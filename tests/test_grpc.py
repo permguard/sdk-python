@@ -8,6 +8,7 @@ import grpc
 import pytest
 
 from permguard import Client, EvaluateRequest, Evaluation, Refusal
+from permguard._grpc_transport import _grpc_class
 from permguard._wire import MAX_EXACT_PROTO_INTEGER, request_to_dict, request_to_proto
 from permguard.data.v1 import pdp_pb2, pdp_pb2_grpc
 
@@ -117,3 +118,12 @@ def test_grpc_mapper_preserves_presence_and_rejects_lossy_integers() -> None:
                 context={'too_large': MAX_EXACT_PROTO_INTEGER + 1},
             )
         )
+
+
+def test_grpc_conflict_fallback_matches_shared_contract() -> None:
+    for code in (
+        grpc.StatusCode.FAILED_PRECONDITION,
+        grpc.StatusCode.ALREADY_EXISTS,
+        grpc.StatusCode.ABORTED,
+    ):
+        assert _grpc_class(code) == 'conflict'

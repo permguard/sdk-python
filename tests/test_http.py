@@ -9,6 +9,7 @@ from typing import Any, ClassVar, Dict, Iterator, Tuple, cast
 import pytest
 
 from permguard import Client, EvaluateRequest, Refusal
+from permguard._http_transport import _http_class
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -97,3 +98,9 @@ def test_http_refusal_is_structured(http_endpoint: Tuple[str, ThreadingHTTPServe
     assert caught.value.error_class == 'validation'
     assert caught.value.code == 'ledger_invalid'
     assert caught.value.http_status == 400
+
+
+def test_http_fallback_and_endpoint_validation_match_shared_contract() -> None:
+    assert _http_class(409) == 'conflict'
+    with pytest.raises(ValueError, match='embedded credentials'):
+        Client('http://user:secret@pdp.example')

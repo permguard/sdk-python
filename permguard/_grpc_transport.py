@@ -76,6 +76,8 @@ def _refusal(error: grpc.RpcError) -> Refusal:
 def _grpc_class(code: grpc.StatusCode) -> str:
     if code in (grpc.StatusCode.INVALID_ARGUMENT, grpc.StatusCode.OUT_OF_RANGE):
         return 'validation'
+    if code in (grpc.StatusCode.FAILED_PRECONDITION, grpc.StatusCode.ALREADY_EXISTS, grpc.StatusCode.ABORTED):
+        return 'conflict'
     if code in (grpc.StatusCode.UNAUTHENTICATED, grpc.StatusCode.PERMISSION_DENIED):
         return 'authorization'
     if code == grpc.StatusCode.NOT_FOUND:

@@ -33,6 +33,8 @@ class Client:
         parsed = urlparse(endpoint)
         if not parsed.netloc:
             raise ValueError('Permguard endpoint requires a host')
+        if parsed.username is not None or parsed.password is not None:
+            raise ValueError('Permguard endpoint must not contain embedded credentials')
         scheme = parsed.scheme.lower()
         held_headers = dict(headers or {})
         if scheme in ('http', 'https'):
