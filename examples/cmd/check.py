@@ -10,9 +10,10 @@ def main() -> None:
     endpoint = os.environ.get('PERMGUARD_PDP_URL', 'grpc://localhost:7443')
     request = EvaluateRequest(
         zone='acme',
-        ledger='documents',
-        subject=Entity(type='user', id='amy@example.com'),
-        resource=Entity(type='document', id='quarterly-report'),
+        ledger='main-ledger',
+        profile='gateway',
+        subject=Entity(type='User', id='alice'),
+        resource=Entity(type='Document', id='budget-2026'),
         action=Action(name='read'),
         request_id='example-1',
     )
