@@ -1,3 +1,6 @@
+# Copyright (c) 2022 Nitro Agility S.r.l.
+# SPDX-License-Identifier: Apache-2.0
+
 .DEFAULT_GOAL := build
 
 brew:
@@ -15,7 +18,13 @@ envdown:
 	hatch env prune && hatch env remove
 
 protoc:
-	python -m grpc_tools.protoc --proto_path=./proto/v1 ./proto/v1/pdp.proto --python_out=. --grpc_python_out=./permguard/internal/az/azreq/grpc/v1
+	python -m grpc_tools.protoc --proto_path=./proto \
+		--python_out=. --pyi_out=. --grpc_python_out=. \
+		./proto/permguard/data/v1/pdp.proto
+	bash scripts/header-generated.sh \
+		permguard/data/v1/pdp_pb2.py \
+		permguard/data/v1/pdp_pb2.pyi \
+		permguard/data/v1/pdp_pb2_grpc.py
 
 # disallow any parallelism (-j) for Make. This is necessary since some
 # commands during the build process create temporary files that collide

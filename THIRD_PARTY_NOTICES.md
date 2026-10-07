@@ -1,3 +1,8 @@
+<!--
+Copyright (c) 2022 Nitro Agility S.r.l.
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # Third-Party Notices
 
 The Permguard Python SDK is distributed under the Apache License, Version 2.0. It depends on the
@@ -11,22 +16,12 @@ covers what is distributed, and a test harness is not.
 
 ## Packages
 
-12 packages.
+2 packages.
 
 | Package | Version | Licence | Source |
 | ------- | ------- | ------- | ------ |
-| `annotated-types` | 0.7.0 | MIT License | https://github.com/annotated-types/annotated-types |
-| `deepdiff` | 8.0.1 | MIT License | https://github.com/seperman/deepdiff |
 | `grpcio` | 1.70.0 | Apache Software License | https://grpc.io |
-| `orderly-set` | 5.2.2 | MIT License | https://github.com/seperman/orderly-set |
 | `protobuf` | 5.29.6 | 3-Clause BSD License | https://developers.google.com/protocol-buffers/ |
-| `pydantic` | 2.10.6 | MIT | https://github.com/pydantic/pydantic |
-| `pydantic_core` | 2.27.2 | MIT License | https://github.com/pydantic/pydantic-core |
-| `pytz` | 2023.4 | MIT License | http://pythonhosted.org/pytz |
-| `pytz-deprecation-shim` | 0.1.0.post0 | Apache Software License | https://github.com/pganssle/pytz-deprecation-shim |
-| `typing_extensions` | 4.16.0 | PSF-2.0 | https://github.com/python/typing_extensions |
-| `tzdata` | 2026.3 | Apache-2.0 | https://github.com/python/tzdata |
-| `tzlocal` | 4.3.1 | MIT License | UNKNOWN |
 
 ## Packages without a declared licence
 

@@ -1,136 +1,134 @@
-# The official Python SDK for Permguard
+<!--
+Copyright (c) 2022 Nitro Agility S.r.l.
+SPDX-License-Identifier: Apache-2.0
+-->
 
-[![GitHub License](https://img.shields.io/github/license/permguard/sdk-python)](https://github.com/permguard/sdk-python?tab=Apache-2.0-1-ov-file#readme)
-[![X (formerly Twitter) Follow](https://img.shields.io/twitter/follow/permguard)](https://x.com/intent/follow?original_referer=https%3A%2F%2Fdeveloper.x.com%2F&ref_src=twsrc%5Etfw%7Ctwcamp%5Ebuttonembed%7Ctwterm%5Efollow%7Ctwgr%5ETwitterDev&screen_name=Permguard)
+# Permguard Python SDK
 
-[![Documentation](https://img.shields.io/website?label=Docs&url=https%3A%2F%2Fwww.permguard.com%2F)](https://www.permguard.com/)
-[![Build, test and publish the artifacts](https://github.com/permguard/sdk-python/actions/workflows/sdk-python-ci.yml/badge.svg)](https://github.com/permguard/sdk-python/actions/workflows/sdk-python-ci.yml)
+The official synchronous Python client for the stateless Permguard PDP
+interface `permguard.api.pdp.native.v1`.
 
-[![Watch the video on YouTube](https://raw.githubusercontent.com/permguard/permguard-assets/refs/heads/main/video/permguard-thumbnail-preview.png)](https://youtu.be/cH_boKCpLQ8?si=i1fWFHT5kxQQJoYN)
+The same API supports both server bindings:
 
-[Watch the video on YouTube](https://youtu.be/cH_boKCpLQ8?si=i1fWFHT5kxQQJoYN)
-
-The Permguard Python SDK provides a simple and flexible client to perform authorization checks against a Permguard Policy Decision Point (PDP) service using gRPC.
-Plase refer to the [Permguard Documentation](https://www.permguard.com/) for more information.
-
----
-
-## Prerequisites
-
-- **Python 3.8, 3.9, 3.10, 3.11** (supported versions)
-
-This package is compatible with the following Python versions:
-
-- `Programming Language :: Python :: 3.8`
-- `Programming Language :: Python :: 3.9`
-- `Programming Language :: Python :: 3.10`
-- `Programming Language :: Python :: 3.11`
-
-Make sure you have one of these versions installed before proceeding.
-
----
+- `http://` and `https://` use JSON;
+- `grpc://` and `grpcs://` use `permguard.data.v1.PolicyDecisionPoint`.
 
 ## Installation
-
-Run the following command to install the SDK:
 
 ```bash
 pip install permguard
 ```
 
----
+Python 3.8 or newer is required.
 
-## Usage Example
-
-Below is a sample Python code demonstrating how to create a Permguard client, build an authorization request using a builder pattern, and process the authorization response:
+## Evaluate one request
 
 ```python
-from permguard.az.azreq.builder_principal import PrincipalBuilder
-from permguard.az.azreq.builder_request_atomic import AZAtomicRequestBuilder
-from permguard.az_client import AZClient
-from permguard.az_config import with_endpoint
+from permguard import Action, Client, Entity, EvaluateRequest
 
-
-az_client = AZClient(with_endpoint("localhost", 9094))
-
-principal = PrincipalBuilder("amy.smith@acmecorp.com").build()
-
-entities = [
-    {
-        "uid": {"type": "PharmaAuthZFlow::Platform::BranchInfo", "id": "subscription"},
-        "attrs": {"active": True},
-        "parents": [],
-    }
-]
-
-req = (
-    AZAtomicRequestBuilder(
-        895741663247,
-        "809257ed202e40cab7e958218eecad20",
-        "platform-creator",
-        "PharmaAuthZFlow::Platform::Subscription",
-        "PharmaAuthZFlow::Platform::Action::create",
+with Client("grpc://localhost:7443") as client:
+    response = client.evaluate(
+        EvaluateRequest(
+            zone="acme",
+            ledger="documents",
+            subject=Entity(type="user", id="amy@example.com"),
+            resource=Entity(type="document", id="quarterly-report"),
+            action=Action(name="read"),
+        )
     )
-    .with_request_id("1234")
-    .with_principal(principal)
-    .with_entities_items("cedar", entities)
-    .with_subject_attibute_type()
-    .with_subject_source("keycloack")
-    .with_subject_property("isSuperUser", True)
-    .with_resource_id("e3a786fd07e24bfa95ba4341d3695ae8")
-    .with_resource_property("isEnabled", True)
-    .with_action_property("isEnabled", True)
-    .with_context_property("time", "2025-01-23T16:17:46+00:00")
-    .with_context_property("isSubscriptionActive", True)
-    .build()
-)
 
-ok, response = az_client.check(req)
-
-if ok:
-    print("✅ authorization permitted")
-else:
-    print("❌ authorization denied")
-    if response and response.context:
-        if response.context.reason_admin:
-            print(f"-> reason admin: {response.context.reason_admin.message}")
-        if response.context.reason_user:
-            print(f"-> reason user: {response.context.reason_user.message}")
-        for eval in response.evaluations:
-            if eval.context and eval.context.reason_user:
-                print(f"-> reason admin: {eval.context.reason_admin.message}")
-                print(f"-> reason user: {eval.context.reason_user.message}")
-    if response and response.evaluations:
-        for eval in response.evaluations:
-            if eval.context:
-                if eval.context.reason_admin:
-                    print(f"-> evaluation requestid {eval.request_id}: reason admin: {eval.context.reason_admin.message}")
-                if eval.context.reason_user:
-                    print(f"-> evaluation requestid {eval.request_id}: reason user: {eval.context.reason_user.message}")
+print("permitted:", response.decision)
 ```
 
----
+Use `http://localhost:7443` to send the same request over HTTP/JSON. A deny is a
+successful response whose `decision` is `False`. Validation, authorization,
+availability, and server failures raise `permguard.Refusal`, preserving their
+stable class and code.
 
-## Version Compatibility
+## Partition inputs
 
-Our SDK follows a versioning scheme aligned with the Permguard Server versions to ensure seamless integration. The versioning format is as follows:
+Runtime data is addressed to the partition name declared by the ledger profile:
 
-**SDK Versioning Format:** `x.y.z`
+```python
+from permguard import PartitionInput
 
-- **x.y**: Indicates the compatible Permguard Server version.
-- **z**: Represents the SDK's patch or minor updates specific to that server version.
+request.partition_inputs["authorization"] = PartitionInput(
+    type="permguard.cedar.entities.v1",
+    data=[
+        {
+            "uid": {"type": "Team", "id": "engineering"},
+            "attrs": {"active": True},
+            "parents": [],
+        }
+    ],
+)
+```
 
-**Compatibility Examples:**
+The key selects a partition already declared by the profile. The input `type`
+is checked against that declaration; it does not select a runtime.
 
-- `SDK Version 1.3.0` is compatible with `Permguard Server 1.3`.
-- `SDK Version 1.3.1` includes minor improvements or bug fixes for `Permguard Server 1.3`.
+## Evaluate a batch
 
-**Incompatibility Example:**
+```python
+from permguard import (
+    Action,
+    Entity,
+    EvaluateRequest,
+    Evaluation,
+    EvaluationOptions,
+    EvaluationsSemantic,
+)
 
-- `SDK Version 1.3.0` **may not be guaranteed** to be compatible with `Permguard Server 1.4` due to potential changes introduced in server version `1.4`.
+response = client.evaluate_many(
+    EvaluateRequest(
+        zone="acme",
+        ledger="documents",
+        subject=Entity(type="user", id="amy@example.com"),
+        evaluations=[
+            Evaluation(
+                resource=Entity(type="document", id="one"),
+                action=Action(name="read"),
+                request_id="one",
+            ),
+            Evaluation(
+                resource=Entity(type="document", id="two"),
+                action=Action(name="read"),
+                request_id="two",
+            ),
+        ],
+        options=EvaluationOptions(
+            evaluations_semantic=EvaluationsSemantic.EXECUTE_ALL,
+        ),
+    )
+)
+```
 
-**Important:** Ensure that the major and minor versions (`x.y`) of the SDK match those of your Permguard Server to maintain compatibility.
+Call `client.get_configuration()` to read the interface discovery document.
+The client reuses its HTTP connection or gRPC channel; use it as a context
+manager or call `close()`.
 
----
+Static HTTP headers and gRPC metadata can be supplied through `headers`. HTTPS
+accepts an `ssl.SSLContext`; gRPCS accepts `grpc.ChannelCredentials`.
 
-Created by [Nitro Agility](https://www.nitroagility.com/).
+## Compatibility
+
+This major version implements `permguard.api.pdp.native.v1`. Compatibility is
+tied to that versioned interface rather than to a server minor release.
+
+## Development and release
+
+```bash
+hatch run protoc
+hatch run dev
+hatch -e lint run all
+hatch build
+```
+
+The existing tag-based PyPI workflow remains the release mechanism. The
+package version is still read from `permguard/__about__.py` and set from the
+release tag.
+
+## License
+
+Apache License 2.0. See [LICENSE](LICENSE) and
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
