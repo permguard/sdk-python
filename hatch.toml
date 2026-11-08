@@ -1,6 +1,7 @@
 [build.targets.sdist]
 exclude = [
   ".github",
+  "assets",
   ".vscode",
   "scripts",
   "bitbucket-pipelines.yml",
