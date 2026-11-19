@@ -52,7 +52,6 @@ from permguard import Action, Client, Entity, EvaluateRequest, Refusal
 request = EvaluateRequest(
     zone="acme",
     ledger="main-ledger",
-    profile="gateway",
     subject=Entity(type="User", id="alice"),
     resource=Entity(type="Document", id="budget-2026"),
     action=Action(name="read"),
@@ -70,6 +69,9 @@ print("permitted:", response.decision)
 ```
 
 The same program is in [examples/cmd](examples/cmd/check.py); set `PERMGUARD_PDP_URL` to point it at another data plane.
+
+A request that names no `profile` is decided by the ledger's `default` profile: the manifest `permguard init` writes declares it, with one partition, `cedar`.
+A ledger whose manifest declares other profiles is asked with the profile's name, and its partition inputs are keyed by that profile's partitions.
 
 ### The request
 
@@ -96,7 +98,7 @@ Runtime data is addressed to the partition name the ledger's profile declares:
 ```python
 from permguard import PartitionInput
 
-request.partition_inputs["authorization"] = PartitionInput(
+request.partition_inputs["cedar"] = PartitionInput(
     type="permguard.cedar.entities.v1",
     data=[
         {

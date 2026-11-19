@@ -11,7 +11,6 @@ def main() -> None:
     request = EvaluateRequest(
         zone='acme',
         ledger='main-ledger',
-        profile='gateway',
         subject=Entity(type='User', id='alice'),
         resource=Entity(type='Document', id='budget-2026'),
         action=Action(name='read'),
