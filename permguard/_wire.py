@@ -3,11 +3,13 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, Iterable, Mapping, Optional
+import math
+from typing import Any, Dict, Mapping, Optional
 
 from google.protobuf import json_format, struct_pb2
 
 from permguard.data.v1 import pdp_pb2
+from permguard.errors import Refusal
 from permguard.models import (
     Action,
     Configuration,
@@ -26,12 +28,14 @@ from permguard.models import (
     StoreScope,
 )
 
-MAX_EXACT_PROTO_INTEGER = (1 << 53) - 1
+# The largest integer both transports carry exactly, the server's bound: 2^53 (BUG-0306).
+MAX_EXACT_PROTO_INTEGER = 1 << 53
 
 
 def request_to_dict(request: EvaluateRequest) -> Dict[str, Any]:
     """Render the canonical HTTP/JSON request without losing field presence."""
 
+    _check_request(request)
     payload: Dict[str, Any] = {'zone': request.zone, 'ledger': request.ledger}
     _put(payload, 'profile', request.profile)
     _put(payload, 'subject', _entity_to_dict(request.subject))
@@ -81,6 +85,7 @@ def configuration_from_dict(payload: Mapping[str, Any]) -> Configuration:
 
 
 def request_to_proto(request: EvaluateRequest) -> pdp_pb2.EvaluateRequest:
+    _check_request(request)
     semantic = _semantic_to_proto(request.options)
     return pdp_pb2.EvaluateRequest(
         zone=request.zone,
@@ -290,17 +295,60 @@ def _optional_text(value: Any) -> Optional[str]:
     return text or None
 
 
+def _check_request(request: EvaluateRequest) -> None:
+    """Check every value of `request` with the server's rule, the same for both transports."""
+
+    def entity(held: Any) -> None:
+        if held is not None:
+            _check_proto_numbers(getattr(held, 'properties', None))
+
+    def inputs(held: Optional[PartitionInputs]) -> None:
+        for value in (held or {}).values():
+            _check_proto_numbers(value.data)
+
+    _check_proto_numbers(request.context)
+    entity(request.subject)
+    entity(request.resource)
+    entity(request.action)
+    entity(request.principal)
+    inputs(request.partition_inputs)
+    for evaluation in request.evaluations or []:
+        _check_proto_numbers(evaluation.context)
+        entity(evaluation.subject)
+        entity(evaluation.resource)
+        entity(evaluation.action)
+        inputs(evaluation.partition_inputs)
+
+
 def _check_proto_numbers(value: Any) -> None:
-    if isinstance(value, bool) or value is None:
+    """Refuse what the PDP refuses, before either transport sends it (BUG-0306, BUG-0307).
+
+    An integer past +-2^53 is `value_unrepresentable`; what is not JSON at all, a NaN or an
+    infinity, a key that is not a string, a value of another type, is `payload_malformed`, never
+    rewritten (json.dumps would turn an integer key into a string, a set into nothing).
+    """
+    if value is None or isinstance(value, (bool, str)):
         return
     if isinstance(value, int):
         if value > MAX_EXACT_PROTO_INTEGER or value < -MAX_EXACT_PROTO_INTEGER:
-            raise ValueError(f'integer {value} is not exactly representable by protobuf Value')
+            raise Refusal(
+                'validation',
+                'value_unrepresentable',
+                f'{value} is beyond the largest integer both transports carry exactly (2^53): send it as a string',
+            )
+        return
+    if isinstance(value, float):
+        if math.isnan(value) or math.isinf(value):
+            raise Refusal('validation', 'payload_malformed', f'{value} is not a JSON number')
         return
     if isinstance(value, Mapping):
-        for held in value.values():
+        for key, held in value.items():
+            if not isinstance(key, str):
+                raise Refusal('validation', 'payload_malformed', f'the key {key!r} is not a string')
             _check_proto_numbers(held)
         return
-    if isinstance(value, Iterable) and not isinstance(value, (str, bytes, bytearray)):
+    if isinstance(value, (list, tuple)):
         for held in value:
             _check_proto_numbers(held)
+        return
+    raise Refusal('validation', 'payload_malformed', f'a {type(value).__name__} is not a JSON value')

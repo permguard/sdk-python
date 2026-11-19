@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from concurrent import futures
-from typing import Iterator, Tuple
+from typing import Any, Dict, Iterator, List, Tuple
 
 import grpc
 import pytest
@@ -110,14 +110,26 @@ def test_grpc_mapper_preserves_presence_and_rejects_lossy_integers() -> None:
     assert wire.evaluations[0].HasField('context')
     assert wire.evaluations[0].HasField('partition_inputs')
 
-    with pytest.raises(ValueError, match='not exactly representable'):
-        request_to_proto(
-            EvaluateRequest(
-                zone='acme',
-                ledger='documents',
-                context={'too_large': MAX_EXACT_PROTO_INTEGER + 1},
-            )
-        )
+    # BUG-0306, BUG-0307: the server's rule, the same on both transports: 2^53 crosses, an
+    # integer past it is `value_unrepresentable`, what is not JSON is `payload_malformed`.
+    def ask(context: Dict[str, Any]) -> EvaluateRequest:
+        return EvaluateRequest(zone='acme', ledger='documents', context=context)
+
+    for encode in (request_to_dict, request_to_proto):
+        encode(ask({'n': MAX_EXACT_PROTO_INTEGER, 'm': -MAX_EXACT_PROTO_INTEGER, 'f': 0.5}))
+        cases: List[Tuple[Dict[Any, Any], str]] = [
+            ({'n': MAX_EXACT_PROTO_INTEGER + 1}, 'value_unrepresentable'),
+            ({'n': -MAX_EXACT_PROTO_INTEGER - 1}, 'value_unrepresentable'),
+            ({'n': float('nan')}, 'payload_malformed'),
+            ({'n': float('inf')}, 'payload_malformed'),
+            ({1: 'integer key'}, 'payload_malformed'),
+            ({'n': {1, 2}}, 'payload_malformed'),
+            ({'n': [1, b'bytes']}, 'payload_malformed'),
+        ]
+        for context, code in cases:
+            with pytest.raises(Refusal) as caught:
+                encode(ask(context))
+            assert (caught.value.error_class, caught.value.code) == ('validation', code)
 
 
 def test_grpc_conflict_fallback_matches_shared_contract() -> None:
