@@ -3,6 +3,7 @@
 
 import json
 import threading
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any, ClassVar, Dict, Iterator, Tuple, cast
 
@@ -18,6 +19,18 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:
         length = int(self.headers.get('Content-Length', '0'))
         Handler.seen = json.loads(self.rfile.read(length))
+        ledger = Handler.seen.get('ledger')
+        if ledger == 'slow':
+            time.sleep(1.5)
+        if ledger == 'too-large':
+            self._raw(413, b'length limit exceeded', 'text/plain')
+            return
+        if ledger == 'empty-401':
+            self._raw(401, b'', None)
+            return
+        if ledger == 'not-json':
+            self._raw(200, b'not json', 'text/plain')
+            return
         if Handler.seen.get('ledger') == 'bad':
             self._json(
                 400,
@@ -52,6 +65,14 @@ class Handler(BaseHTTPRequestHandler):
 
     def log_message(self, _format: str, *_args: Any) -> None:
         return
+
+    def _raw(self, status: int, body: bytes, content_type: Any) -> None:
+        self.send_response(status)
+        if content_type is not None:
+            self.send_header('Content-Type', content_type)
+        self.send_header('Content-Length', str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
 
     def _json(self, status: int, payload: Dict[str, Any]) -> None:
         encoded = json.dumps(payload).encode('utf-8')
@@ -104,3 +125,40 @@ def test_http_fallback_and_endpoint_validation_match_shared_contract() -> None:
     assert _http_class(409) == 'conflict'
     with pytest.raises(ValueError, match='embedded credentials'):
         Client('http://user:secret@pdp.example')
+
+
+def test_http_per_call_timeout_holds_on_a_reused_connection(
+    http_endpoint: Tuple[str, ThreadingHTTPServer],
+) -> None:
+    """BUG-0276: each call's timeout bounds it on the connection kept open."""
+    endpoint, _ = http_endpoint
+    with Client(endpoint, timeout=5) as client:
+        client.evaluate(EvaluateRequest(zone='acme', ledger='documents'))
+        started = time.monotonic()
+        with pytest.raises(RuntimeError):
+            client.evaluate(EvaluateRequest(zone='acme', ledger='slow'), timeout=0.5)
+        assert time.monotonic() - started < 1.4, 'bounded by the call, not by the server'
+        # A call with no timeout of its own is bounded by the client's, not by 0.5 s.
+        client.evaluate(EvaluateRequest(zone='acme', ledger='documents'))
+        response = client.evaluate(EvaluateRequest(zone='acme', ledger='slow'))
+        assert response.decision is False
+
+
+def test_http_error_body_that_is_not_json_is_a_refusal(
+    http_endpoint: Tuple[str, ThreadingHTTPServer],
+) -> None:
+    """BUG-0282: the status is read first; a non-JSON error body is the refusal's message."""
+    endpoint, _ = http_endpoint
+    with Client(endpoint) as client:
+        with pytest.raises(Refusal) as caught:
+            client.evaluate(EvaluateRequest(zone='acme', ledger='too-large'))
+        assert caught.value.http_status == 413
+        assert caught.value.code == 'http_status'
+        assert caught.value.error_class == 'internal'
+        assert 'length limit exceeded' in str(caught.value)
+        with pytest.raises(Refusal) as caught:
+            client.evaluate(EvaluateRequest(zone='acme', ledger='empty-401'))
+        assert caught.value.http_status == 401
+        assert caught.value.error_class == 'authorization'
+        with pytest.raises(RuntimeError, match='decode Permguard HTTP response'):
+            client.evaluate(EvaluateRequest(zone='acme', ledger='not-json'))

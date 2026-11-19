@@ -30,13 +30,18 @@ classifiers = [
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
+# Lower bounds only: a newer Python takes the first grpcio release with a wheel for it (Python 3.14
+# needs grpcio 1.75 or newer), and pip keeps an older one for Python 3.8 (BUG-0314).
 dependencies = [
-  "grpcio~=1.70.0",
-  "protobuf~=5.29.3"
+  "grpcio>=1.70.0",
+  "protobuf>=5.29.3,<7"
 ]
 dynamic = ["version"]
 

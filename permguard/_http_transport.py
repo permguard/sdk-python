@@ -79,11 +79,16 @@ class HTTPTransport:
         if body is not None:
             headers['Content-Type'] = 'application/json'
 
+        # Each call's own timeout, on a connection kept open too: `HTTPConnection.timeout` is read
+        # only when it connects, so the open socket is given it as well (BUG-0276).
+        effective = timeout if timeout is not None else self._timeout
         with self._lock:
             if self._connection is None:
-                self._connection = self._connect(timeout or self._timeout)
-            elif timeout is not None:
-                self._connection.timeout = timeout
+                self._connection = self._connect(effective)
+            else:
+                self._connection.timeout = effective
+                if self._connection.sock is not None:
+                    self._connection.sock.settimeout(effective)
             try:
                 self._connection.request(method, path, body=body, headers=headers)
                 response = self._connection.getresponse()
@@ -95,21 +100,31 @@ class HTTPTransport:
 
         if len(raw) > MAX_RESPONSE_BYTES:
             raise RuntimeError(f'Permguard HTTP response exceeds {MAX_RESPONSE_BYTES} bytes')
+        # The status first: an error body need not be JSON, a proxy's or the PDP's own `413`
+        # (BUG-0282).
+        if response.status < HTTPStatus.OK or response.status >= HTTPStatus.MULTIPLE_CHOICES:
+            raise _refusal(response.status, raw)
         try:
             decoded = json.loads(raw.decode('utf-8'))
         except (UnicodeDecodeError, json.JSONDecodeError) as error:
             raise RuntimeError(f'decode Permguard HTTP response: {error}') from error
         if not isinstance(decoded, dict):
             raise RuntimeError('decode Permguard HTTP response: expected a JSON object')
-        if response.status < HTTPStatus.OK or response.status >= HTTPStatus.MULTIPLE_CHOICES:
-            raise _refusal(response.status, decoded)
         return decoded
 
 
-def _refusal(status: int, payload: Mapping[str, Any]) -> Refusal:
+def _refusal(status: int, raw: bytes) -> Refusal:
+    text = raw.decode('utf-8', errors='replace').strip()
+    try:
+        decoded = json.loads(text)
+    except json.JSONDecodeError:
+        decoded = None
+    payload: Mapping[str, Any] = decoded if isinstance(decoded, dict) else {}
+    # A body that is not a JSON object is the message as the server wrote it.
+    body = '' if isinstance(decoded, dict) else text
     error_class = str(payload.get('class') or _http_class(status))
     code = str(payload.get('code') or 'http_status')
-    message = str(payload.get('message') or http.client.responses.get(status, 'HTTP request failed'))
+    message = str(payload.get('message') or body or http.client.responses.get(status, 'HTTP request failed'))
     return Refusal(error_class, code, message, http_status=status)
 
 
