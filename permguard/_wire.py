@@ -391,24 +391,32 @@ def _check_request(request: EvaluateRequest) -> None:
 
     def entity(held: Any) -> None:
         if held is not None:
-            _check_proto_numbers(getattr(held, 'properties', None))
+            _check_object(getattr(held, 'properties', None), 'properties')
 
     def inputs(held: Optional[PartitionInputs]) -> None:
         for value in (held or {}).values():
             _check_proto_numbers(value.data)
 
-    _check_proto_numbers(request.context)
+    _check_object(request.context, 'context')
     entity(request.subject)
     entity(request.resource)
     entity(request.action)
     entity(request.principal)
     inputs(request.partition_inputs)
     for evaluation in request.evaluations or []:
-        _check_proto_numbers(evaluation.context)
+        _check_object(evaluation.context, 'context')
         entity(evaluation.subject)
         entity(evaluation.resource)
         entity(evaluation.action)
         inputs(evaluation.partition_inputs)
+
+
+def _check_object(value: Any, name: str) -> None:
+    """A context or properties is a JSON object on both transports, refused alike otherwise (BUG-0307)."""
+    if value is not None and not isinstance(value, Mapping):
+        message = f'the {name} must be a JSON object, not a {type(value).__name__}'
+        raise Refusal('validation', 'payload_malformed', message)
+    _check_proto_numbers(value)
 
 
 def _check_proto_numbers(value: Any) -> None:

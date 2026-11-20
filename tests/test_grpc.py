@@ -1,6 +1,8 @@
 # Copyright (c) 2022 Nitro Agility S.r.l.
 # SPDX-License-Identifier: Apache-2.0
 
+import socket
+import time
 from concurrent import futures
 from typing import Any, Dict, Iterator, List, Tuple
 
@@ -130,6 +132,41 @@ def test_grpc_mapper_preserves_presence_and_rejects_lossy_integers() -> None:
             with pytest.raises(Refusal) as caught:
                 encode(ask(context))
             assert (caught.value.error_class, caught.value.code) == ('validation', code)
+
+
+def test_a_context_that_is_not_an_object_is_the_same_refusal_on_both_transports() -> None:
+    """BUG-0307: a list, a string or a number as context is refused alike, never a TypeError."""
+    for encode in (request_to_dict, request_to_proto):
+        for context in ([1, 2], 'text', 7):
+            with pytest.raises(Refusal) as caught:
+                encode(EvaluateRequest(zone='acme', ledger='documents', context=context))  # type: ignore[arg-type]
+            assert (caught.value.error_class, caught.value.code) == ('validation', 'payload_malformed')
+        with pytest.raises(Refusal) as caught:
+            encode(EvaluateRequest(zone='acme', ledger='documents', evaluations=[Evaluation(context=[1])]))  # type: ignore[arg-type]
+        assert caught.value.code == 'payload_malformed'
+
+
+def test_a_timeout_and_an_unreachable_plane_are_the_same_refusal_on_both_transports() -> None:
+    """BUG-0284: a client-side failure is `unavailable` with one code, whatever the scheme."""
+    silent = socket.socket()
+    silent.bind(('127.0.0.1', 0))
+    silent.listen(16)
+    held = silent.getsockname()[1]
+    closed = socket.socket()
+    closed.bind(('127.0.0.1', 0))
+    gone = closed.getsockname()[1]
+    closed.close()
+    try:
+        for scheme in ('http', 'grpc'):
+            for port, code in ((held, 'timeout'), (gone, 'unreachable')):
+                with Client(f'{scheme}://127.0.0.1:{port}', timeout=0.5) as client:
+                    started = time.monotonic()
+                    with pytest.raises(Refusal) as caught:
+                        client.evaluate(EvaluateRequest(zone='acme', ledger='documents'))
+                    assert (scheme, caught.value.error_class, caught.value.code) == (scheme, 'unavailable', code)
+                    assert time.monotonic() - started < 3, 'bounded by the timeout'
+    finally:
+        silent.close()
 
 
 def test_grpc_conflict_fallback_matches_shared_contract() -> None:

@@ -135,8 +135,9 @@ def test_http_per_call_timeout_holds_on_a_reused_connection(
     with Client(endpoint, timeout=5) as client:
         client.evaluate(EvaluateRequest(zone='acme', ledger='documents'))
         started = time.monotonic()
-        with pytest.raises(RuntimeError):
+        with pytest.raises(Refusal) as caught:
             client.evaluate(EvaluateRequest(zone='acme', ledger='slow'), timeout=0.5)
+        assert (caught.value.error_class, caught.value.code) == ('unavailable', 'timeout')
         assert time.monotonic() - started < 1.4, 'bounded by the call, not by the server'
         # A call with no timeout of its own is bounded by the client's, not by 0.5 s.
         client.evaluate(EvaluateRequest(zone='acme', ledger='documents'))

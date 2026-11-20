@@ -3,8 +3,10 @@
 
 from __future__ import annotations
 
+import errno
 import http.client
 import json
+import socket
 import ssl
 import threading
 from http import HTTPStatus
@@ -96,7 +98,7 @@ class HTTPTransport:
             except (OSError, http.client.HTTPException) as error:
                 self._connection.close()
                 self._connection = None
-                raise RuntimeError(f'call Permguard HTTP endpoint: {error}') from error
+                raise _client_failure(error, effective) from error
 
         if len(raw) > MAX_RESPONSE_BYTES:
             raise RuntimeError(f'Permguard HTTP response exceeds {MAX_RESPONSE_BYTES} bytes')
@@ -111,6 +113,25 @@ class HTTPTransport:
         if not isinstance(decoded, dict):
             raise RuntimeError('decode Permguard HTTP response: expected a JSON object')
         return decoded
+
+
+# The errors that say the data plane was not reached: refused, reset, closed before it answered, a
+# host or network that cannot be reached, a name that does not resolve.
+_UNREACHABLE_ERRNOS = frozenset(
+    getattr(errno, name) for name in ('EHOSTUNREACH', 'ENETUNREACH', 'EHOSTDOWN', 'ENETDOWN') if hasattr(errno, name)
+)
+
+
+def _client_failure(error: Exception, timeout: float) -> Exception:
+    """A call that failed in the client, said as over gRPC and in every Permguard SDK (BUG-0284)."""
+    if isinstance(error, socket.timeout):
+        return Refusal(Refusal.UNAVAILABLE, Refusal.TIMEOUT, f'the data plane did not answer within {timeout}s')
+    if (
+        isinstance(error, (ConnectionError, socket.gaierror, http.client.RemoteDisconnected))
+        or getattr(error, 'errno', None) in _UNREACHABLE_ERRNOS
+    ):
+        return Refusal(Refusal.UNAVAILABLE, Refusal.UNREACHABLE, f'the data plane could not be reached: {error}')
+    return RuntimeError(f'call Permguard HTTP endpoint: {error}')
 
 
 def _refusal(status: int, raw: bytes) -> Refusal:

@@ -9,7 +9,16 @@ import grpc
 
 
 class Refusal(Exception):
-    """A structured PDP failure. A deny is a successful response, not a refusal."""
+    """A structured PDP failure. A deny is a successful response, not a refusal.
+
+    A call that fails in the client is a refusal too, the same on HTTP and gRPC and in every
+    Permguard SDK: class `unavailable`, code `timeout` when the call's timeout passed, code
+    `unreachable` when the data plane could not be reached (BUG-0284).
+    """
+
+    UNAVAILABLE = 'unavailable'
+    TIMEOUT = 'timeout'
+    UNREACHABLE = 'unreachable'
 
     def __init__(
         self,

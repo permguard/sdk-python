@@ -65,6 +65,13 @@ def _refusal(error: grpc.RpcError) -> Refusal:
     for key, value in metadata:
         values[key] = value.decode('ascii') if isinstance(value, bytes) else str(value)
     grpc_code = error.code()
+    # A status the data plane did not name is the transport's: a deadline that passed or a plane
+    # never reached, said as over HTTP and in every Permguard SDK (BUG-0284).
+    if GRPC_ERROR_CLASS not in values and GRPC_ERROR_CODE not in values:
+        if grpc_code == grpc.StatusCode.DEADLINE_EXCEEDED:
+            return Refusal(Refusal.UNAVAILABLE, Refusal.TIMEOUT, error.details() or str(error), grpc_code=grpc_code)
+        if grpc_code == grpc.StatusCode.UNAVAILABLE:
+            return Refusal(Refusal.UNAVAILABLE, Refusal.UNREACHABLE, error.details() or str(error), grpc_code=grpc_code)
     return Refusal(
         values.get(GRPC_ERROR_CLASS, _grpc_class(grpc_code)),
         values.get(GRPC_ERROR_CODE, grpc_code.name.lower()),
