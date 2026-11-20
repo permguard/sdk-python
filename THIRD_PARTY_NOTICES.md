@@ -16,12 +16,13 @@ covers what is distributed, and a test harness is not.
 
 ## Packages
 
-2 packages.
+3 packages.
 
 | Package | Version | Licence | Source |
 | ------- | ------- | ------- | ------ |
-| `grpcio` | 1.70.0 | Apache Software License | https://grpc.io |
-| `protobuf` | 5.29.6 | 3-Clause BSD License | https://developers.google.com/protocol-buffers/ |
+| `grpcio` | 1.85.3 | Apache-2.0 | https://grpc.io |
+| `protobuf` | 6.33.6 | 3-Clause BSD License | https://developers.google.com/protocol-buffers/ |
+| `typing_extensions` | 4.16.0 | PSF-2.0 | https://github.com/python/typing_extensions |
 
 ## Packages without a declared licence
 
