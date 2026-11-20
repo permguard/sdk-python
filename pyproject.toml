@@ -166,6 +166,7 @@ ban-relative-imports = "all"
 "examples/**/*" = ["T201", "EM102"]
 # Tests can use magic values, assertions, and relative imports
 "tests/**/*" = ["N802", "PLR2004", "S101", "TID252"]
+"e2e/**/*" = ["N802", "PLR2004", "S101", "TID252"]
 
 [tool.coverage.run]
 branch = true

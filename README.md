@@ -85,11 +85,15 @@ A ledger whose manifest declares other profiles is asked with the profile's name
 | `context`          | any other fact the policies read                                        |
 | `partition_inputs` | runtime data for the partitions of the profile, see below               |
 | `request_id`       | your id for the call, given back in the answer                          |
+| `request_nonce`    | asks for a signed response, see below                                   |
 
 ### The answer
 
 A deny is not an exception: it is a successful response whose `decision` is `False`.
 Validation, authorization, availability and server failures raise `permguard.Refusal`, with their stable `error_class` and `code`.
+
+Each decision's `context.evidence` says how the plane recorded it: its `mode`, its `status` and, once recorded, its `record_id` and `position`.
+A request that sets `request_nonce` (base64url without padding, 16 to 64 bytes) asks for a signed response, and the answer carries the plane's `attestation`: the plane signs only for an authenticated caller, and refuses with `unauthenticated` rather than answer unsigned.
 
 ## Partition inputs
 
@@ -202,6 +206,10 @@ See the [Authority Plane](https://docs.permguard.com/how-it-works/authority-plan
 This major version implements `permguard.api.pdp.native.v1`.
 Compatibility is tied to that versioned interface, not to a server minor release.
 
+The contract this release carries is the `pdp.proto` of Permguard `v0.1.33`, the tag [PERMGUARD_CONTRACT](PERMGUARD_CONTRACT) names: CI fails when the copy in `proto/` differs from it, and runs the tests against a data plane of that release over HTTP and gRPC.
+It covers the decision interface: a request may ask for a signed response with `request_nonce`, and the answer carries the plane's `attestation` and each decision's `context.evidence`; the discovery document carries the version, lifecycle, limits and response signing.
+The temporal interface, `permguard.api.pdp.temporal.v1alpha1`, is not covered by this SDK.
+
 ## Develop
 
 ```bash
@@ -210,6 +218,9 @@ hatch run dev
 hatch -e lint run all
 hatch build
 ```
+
+`proto/permguard/data/v1/pdp.proto` is the canonical contract of the Permguard release `PERMGUARD_CONTRACT` names; `bash scripts/check-contract.sh proto/permguard/data/v1/pdp.proto` checks it, and the bindings are regenerated with grpcio-tools 1.70.0 whenever it changes.
+`bash scripts/e2e-server.sh` starts that release with a ledger the end-to-end tests ask (`E2E_HTTP=http://127.0.0.1:7443 E2E_GRPC=grpc://127.0.0.1:7443 python -m pytest -q e2e`); `E2E_PORT_OFFSET` moves its ports when another server holds them.
 
 A release tag publishes to PyPI.
 The package version is read from `permguard/__about__.py` and set from the release tag.

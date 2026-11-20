@@ -79,6 +79,8 @@ class EvaluateRequest:
     evaluations: List[Evaluation] = field(default_factory=list)
     options: Optional[EvaluationOptions] = None
     request_id: Optional[str] = None
+    request_nonce: Optional[str] = None
+    """Asks for a signed response: base64url without padding, 16 to 64 bytes."""
 
 
 @dataclass
@@ -88,12 +90,41 @@ class Reason:
 
 
 @dataclass
+class EvidencePosition:
+    """Where a recorded decision sits in its host's evidence stream."""
+
+    host_id: str
+    run: str
+    sequence: str
+
+
+@dataclass
+class Evidence:
+    """The evidence record of a decision."""
+
+    mode: str
+    status: str
+    record_id: Optional[str] = None
+    position: Optional[EvidencePosition] = None
+
+
+@dataclass
+class Attestation:
+    """A signed response: the flattened JWS parts over the decision."""
+
+    protected: str
+    payload: str
+    signature: str
+
+
+@dataclass
 class DecisionContext:
     id: Optional[str] = None
     reason_admin: Optional[Reason] = None
     reason_user: Optional[Reason] = None
     policies: List[str] = field(default_factory=list)
     absent_inputs: List[str] = field(default_factory=list)
+    evidence: Optional[Evidence] = None
 
 
 @dataclass
@@ -109,6 +140,7 @@ class EvaluateResponse:
     request_id: Optional[str] = None
     context: Optional[DecisionContext] = None
     evaluations: List[Decision] = field(default_factory=list)
+    attestation: Optional[Attestation] = None
 
 
 @dataclass
@@ -126,9 +158,25 @@ class StoreScope:
 
 
 @dataclass
+class ResponseSigning:
+    """Whether the PDP signs a response a request asks it to sign."""
+
+    state: str = ''
+    validity_seconds: Optional[int] = None
+    clock_skew_seconds: Optional[int] = None
+
+
+@dataclass
 class Configuration:
     interface: str
     pdp: str
     endpoints: Endpoints
     capabilities: List[str]
     store_scope: StoreScope
+    version: str = ''
+    component: str = ''
+    state: str = ''
+    stage: str = ''
+    sunset: Optional[str] = None
+    limits: Dict[str, int] = field(default_factory=dict)
+    response_signing: ResponseSigning = field(default_factory=ResponseSigning)

@@ -18,6 +18,7 @@ from permguard.client import Client
 from permguard.errors import Refusal
 from permguard.models import (
     Action,
+    Attestation,
     Configuration,
     Decision,
     DecisionContext,
@@ -28,14 +29,18 @@ from permguard.models import (
     Evaluation,
     EvaluationOptions,
     EvaluationsSemantic,
+    Evidence,
+    EvidencePosition,
     PartitionInput,
     PartitionInputs,
     Reason,
+    ResponseSigning,
     StoreScope,
 )
 
 __all__ = [
     'Action',
+    'Attestation',
     'Client',
     'Configuration',
     'Decision',
@@ -47,9 +52,12 @@ __all__ = [
     'Evaluation',
     'EvaluationOptions',
     'EvaluationsSemantic',
+    'Evidence',
+    'EvidencePosition',
     'PartitionInput',
     'PartitionInputs',
     'Reason',
     'Refusal',
+    'ResponseSigning',
     'StoreScope',
 ]

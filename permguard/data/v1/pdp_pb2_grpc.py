@@ -29,7 +29,8 @@ if _version_not_supported:
 
 
 class PolicyDecisionPointStub(object):
-    """Missing associated documentation comment in .proto file."""
+    """The decision service a PEP calls.
+    """
 
     def __init__(self, channel):
         """Constructor.
@@ -55,22 +56,27 @@ class PolicyDecisionPointStub(object):
 
 
 class PolicyDecisionPointServicer(object):
-    """Missing associated documentation comment in .proto file."""
+    """The decision service a PEP calls.
+    """
 
     def Evaluate(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """One access evaluation.
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def EvaluateMany(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Many, in one exchange, resolved by the requested semantic.
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def GetConfiguration(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """What `permguard.pdp.v1` offers here — the same thing the HTTP binding
+        publishes at `/.well-known/permguard-pdp-v1-configuration`.
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -102,7 +108,8 @@ def add_PolicyDecisionPointServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class PolicyDecisionPoint(object):
-    """Missing associated documentation comment in .proto file."""
+    """The decision service a PEP calls.
+    """
 
     @staticmethod
     def Evaluate(request,
@@ -175,6 +182,200 @@ class PolicyDecisionPoint(object):
             '/permguard.data.v1.PolicyDecisionPoint/GetConfiguration',
             permguard_dot_data_dot_v1_dot_pdp__pb2.GetConfigurationRequest.SerializeToString,
             permguard_dot_data_dot_v1_dot_pdp__pb2.GetConfigurationResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+
+class TemporalPolicyDecisionPointStub(object):
+    """─── permguard.api.pdp.temporal.v1alpha1 ─────────────────────────────────────
+
+    The stateful decision interface: an occurrence is recorded into a durable
+    history and decided against it. Field for field the JSON binding, so a
+    deployment chooses a transport without choosing semantics.
+
+    `v1alpha1` because its wire and replication contracts have not yet proven
+    stable — not because anything here is unimplemented.
+
+    The temporal decision service a PEP calls.
+    """
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.SubmitEvent = channel.unary_unary(
+                '/permguard.data.v1.TemporalPolicyDecisionPoint/SubmitEvent',
+                request_serializer=permguard_dot_data_dot_v1_dot_pdp__pb2.SubmitEventRequest.SerializeToString,
+                response_deserializer=permguard_dot_data_dot_v1_dot_pdp__pb2.SubmitEventResponse.FromString,
+                _registered_method=True)
+        self.GetTemporalConfiguration = channel.unary_unary(
+                '/permguard.data.v1.TemporalPolicyDecisionPoint/GetTemporalConfiguration',
+                request_serializer=permguard_dot_data_dot_v1_dot_pdp__pb2.GetTemporalConfigurationRequest.SerializeToString,
+                response_deserializer=permguard_dot_data_dot_v1_dot_pdp__pb2.GetTemporalConfigurationResponse.FromString,
+                _registered_method=True)
+        self.GetSigners = channel.unary_unary(
+                '/permguard.data.v1.TemporalPolicyDecisionPoint/GetSigners',
+                request_serializer=permguard_dot_data_dot_v1_dot_pdp__pb2.GetTemporalSignersRequest.SerializeToString,
+                response_deserializer=permguard_dot_data_dot_v1_dot_pdp__pb2.GetTemporalSignersResponse.FromString,
+                _registered_method=True)
+
+
+class TemporalPolicyDecisionPointServicer(object):
+    """─── permguard.api.pdp.temporal.v1alpha1 ─────────────────────────────────────
+
+    The stateful decision interface: an occurrence is recorded into a durable
+    history and decided against it. Field for field the JSON binding, so a
+    deployment chooses a transport without choosing semantics.
+
+    `v1alpha1` because its wire and replication contracts have not yet proven
+    stable — not because anything here is unimplemented.
+
+    The temporal decision service a PEP calls.
+    """
+
+    def SubmitEvent(self, request, context):
+        """One occurrence: recorded, observed, and decided when its kind decides.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetTemporalConfiguration(self, request, context):
+        """What this interface offers here — the same thing the HTTP binding
+        publishes at `/.well-known/permguard-pdp-temporal-v1alpha1-configuration`.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetSigners(self, request, context):
+        """This plane's own journal watermarks and signer history for one ledger —
+        which key signed which stretch, public keys included. The same document
+        the HTTP binding serves at `/temporal/v1alpha1/zones/{zone}/ledgers/{ledger}/signers`.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_TemporalPolicyDecisionPointServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'SubmitEvent': grpc.unary_unary_rpc_method_handler(
+                    servicer.SubmitEvent,
+                    request_deserializer=permguard_dot_data_dot_v1_dot_pdp__pb2.SubmitEventRequest.FromString,
+                    response_serializer=permguard_dot_data_dot_v1_dot_pdp__pb2.SubmitEventResponse.SerializeToString,
+            ),
+            'GetTemporalConfiguration': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetTemporalConfiguration,
+                    request_deserializer=permguard_dot_data_dot_v1_dot_pdp__pb2.GetTemporalConfigurationRequest.FromString,
+                    response_serializer=permguard_dot_data_dot_v1_dot_pdp__pb2.GetTemporalConfigurationResponse.SerializeToString,
+            ),
+            'GetSigners': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetSigners,
+                    request_deserializer=permguard_dot_data_dot_v1_dot_pdp__pb2.GetTemporalSignersRequest.FromString,
+                    response_serializer=permguard_dot_data_dot_v1_dot_pdp__pb2.GetTemporalSignersResponse.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'permguard.data.v1.TemporalPolicyDecisionPoint', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+    server.add_registered_method_handlers('permguard.data.v1.TemporalPolicyDecisionPoint', rpc_method_handlers)
+
+
+ # This class is part of an EXPERIMENTAL API.
+class TemporalPolicyDecisionPoint(object):
+    """─── permguard.api.pdp.temporal.v1alpha1 ─────────────────────────────────────
+
+    The stateful decision interface: an occurrence is recorded into a durable
+    history and decided against it. Field for field the JSON binding, so a
+    deployment chooses a transport without choosing semantics.
+
+    `v1alpha1` because its wire and replication contracts have not yet proven
+    stable — not because anything here is unimplemented.
+
+    The temporal decision service a PEP calls.
+    """
+
+    @staticmethod
+    def SubmitEvent(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/permguard.data.v1.TemporalPolicyDecisionPoint/SubmitEvent',
+            permguard_dot_data_dot_v1_dot_pdp__pb2.SubmitEventRequest.SerializeToString,
+            permguard_dot_data_dot_v1_dot_pdp__pb2.SubmitEventResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetTemporalConfiguration(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/permguard.data.v1.TemporalPolicyDecisionPoint/GetTemporalConfiguration',
+            permguard_dot_data_dot_v1_dot_pdp__pb2.GetTemporalConfigurationRequest.SerializeToString,
+            permguard_dot_data_dot_v1_dot_pdp__pb2.GetTemporalConfigurationResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetSigners(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/permguard.data.v1.TemporalPolicyDecisionPoint/GetSigners',
+            permguard_dot_data_dot_v1_dot_pdp__pb2.GetTemporalSignersRequest.SerializeToString,
+            permguard_dot_data_dot_v1_dot_pdp__pb2.GetTemporalSignersResponse.FromString,
             options,
             channel_credentials,
             insecure,

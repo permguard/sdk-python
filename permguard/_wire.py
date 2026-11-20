@@ -12,6 +12,7 @@ from permguard.data.v1 import pdp_pb2
 from permguard.errors import Refusal
 from permguard.models import (
     Action,
+    Attestation,
     Configuration,
     Decision,
     DecisionContext,
@@ -22,9 +23,12 @@ from permguard.models import (
     Evaluation,
     EvaluationOptions,
     EvaluationsSemantic,
+    Evidence,
+    EvidencePosition,
     PartitionInput,
     PartitionInputs,
     Reason,
+    ResponseSigning,
     StoreScope,
 )
 
@@ -52,6 +56,7 @@ def request_to_dict(request: EvaluateRequest) -> Dict[str, Any]:
         if options:
             payload['options'] = options
     _put(payload, 'request_id', request.request_id)
+    _put(payload, 'request_nonce', request.request_nonce)
     return payload
 
 
@@ -61,6 +66,7 @@ def response_from_dict(payload: Mapping[str, Any]) -> EvaluateResponse:
         request_id=_optional_text(payload.get('request_id')),
         context=_context_from_dict(payload.get('context')),
         evaluations=[_decision_from_dict(item) for item in payload.get('evaluations', [])],
+        attestation=_attestation_from_dict(payload.get('attestation')),
     )
 
 
@@ -81,6 +87,13 @@ def configuration_from_dict(payload: Mapping[str, Any]) -> Configuration:
             ledger=str(scope.get('ledger', '')),
             profile=str(scope.get('profile', '')),
         ),
+        version=str(payload.get('version', '')),
+        component=str(payload.get('component', '')),
+        state=str(payload.get('state', '')),
+        stage=str(payload.get('stage', '')),
+        sunset=_optional_text(payload.get('sunset')),
+        limits={str(name): int(value) for name, value in (payload.get('limits') or {}).items()},
+        response_signing=_signing_from_dict(payload.get('response_signing')),
     )
 
 
@@ -100,6 +113,7 @@ def request_to_proto(request: EvaluateRequest) -> pdp_pb2.EvaluateRequest:
         evaluations_semantic=semantic,
         request_id=request.request_id or '',
         partition_inputs=_inputs_to_proto(request.partition_inputs),
+        request_nonce=request.request_nonce or '',
     )
 
 
@@ -109,6 +123,13 @@ def response_from_proto(response: pdp_pb2.EvaluateResponse) -> EvaluateResponse:
         request_id=response.request_id or None,
         context=_context_from_proto(response.context) if response.HasField('context') else None,
         evaluations=[_decision_from_proto(item) for item in response.evaluations],
+        attestation=Attestation(
+            protected=response.attestation.protected,
+            payload=response.attestation.payload,
+            signature=response.attestation.signature,
+        )
+        if response.HasField('attestation')
+        else None,
     )
 
 
@@ -125,6 +146,17 @@ def configuration_from_proto(response: pdp_pb2.GetConfigurationResponse) -> Conf
             zone=scope.zone,
             ledger=scope.ledger,
             profile=scope.profile,
+        ),
+        version=response.version,
+        component=response.component,
+        state=response.state,
+        stage=response.stage,
+        sunset=response.sunset if response.HasField('sunset') else None,
+        limits=dict(response.limits),
+        response_signing=ResponseSigning(
+            state=response.response_signing.state,
+            validity_seconds=response.response_signing.validity_seconds or None,
+            clock_skew_seconds=response.response_signing.clock_skew_seconds or None,
         ),
     )
 
@@ -257,6 +289,49 @@ def _context_from_dict(payload: Any) -> Optional[DecisionContext]:
         reason_user=_reason_from_dict(payload.get('reason_user')),
         policies=[str(item) for item in payload.get('policies', [])],
         absent_inputs=[str(item) for item in payload.get('absent_inputs', [])],
+        evidence=_evidence_from_dict(payload.get('evidence')),
+    )
+
+
+def _evidence_from_dict(payload: Any) -> Optional[Evidence]:
+    if not isinstance(payload, Mapping):
+        return None
+    position = payload.get('position')
+    return Evidence(
+        mode=str(payload.get('mode', '')),
+        status=str(payload.get('status', '')),
+        record_id=_optional_text(payload.get('record_id')),
+        position=EvidencePosition(
+            host_id=str(position.get('host_id', '')),
+            run=str(position.get('run', '')),
+            sequence=str(position.get('sequence', '')),
+        )
+        if isinstance(position, Mapping)
+        else None,
+    )
+
+
+def _attestation_from_dict(payload: Any) -> Optional[Attestation]:
+    if not isinstance(payload, Mapping):
+        return None
+    return Attestation(
+        protected=str(payload.get('protected', '')),
+        payload=str(payload.get('payload', '')),
+        signature=str(payload.get('signature', '')),
+    )
+
+
+def _signing_from_dict(payload: Any) -> ResponseSigning:
+    if not isinstance(payload, Mapping):
+        return ResponseSigning()
+
+    def seconds(value: Any) -> Optional[int]:
+        return int(value) if isinstance(value, int) and value > 0 else None
+
+    return ResponseSigning(
+        state=str(payload.get('state', '')),
+        validity_seconds=seconds(payload.get('validity_seconds')),
+        clock_skew_seconds=seconds(payload.get('clock_skew_seconds')),
     )
 
 
@@ -281,6 +356,22 @@ def _context_from_proto(context: pdp_pb2.DecisionContext) -> DecisionContext:
         reason_user=_reason_from_proto(context.reason_user) if context.HasField('reason_user') else None,
         policies=list(context.policies),
         absent_inputs=list(context.absent_inputs),
+        evidence=_evidence_from_proto(context.evidence) if context.HasField('evidence') else None,
+    )
+
+
+def _evidence_from_proto(evidence: pdp_pb2.Evidence) -> Evidence:
+    return Evidence(
+        mode=evidence.mode,
+        status=evidence.status,
+        record_id=evidence.record_id if evidence.HasField('record_id') else None,
+        position=EvidencePosition(
+            host_id=evidence.position.host_id,
+            run=evidence.position.run,
+            sequence=evidence.position.sequence,
+        )
+        if evidence.HasField('position')
+        else None,
     )
 
 
